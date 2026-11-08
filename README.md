@@ -75,6 +75,38 @@ Optional: a `CNAME` record named `www` whose value is `rominarin.github.io` (no 
 
 4. When the apex resolves to those addresses, return to **Settings → Pages** and turn on **Enforce HTTPS**. The checkbox can stay unavailable for up to 24 hours after DNS starts pointing at GitHub.
 
+## Suggest an update
+
+The map has a **Suggest an update** button. It does not store anything until you connect a form. The setting is `suggestionEndpoint` in `site/config.js`. Leave it as an empty string and the button explains that suggestions are not connected yet. If you set `contactEmail` instead, the button opens the visitor’s email app with the note filled in.
+
+To receive submissions with Formspree:
+
+1. Create a form at [formspree.io](https://formspree.io) with fields named `building`, `category`, `location`, `note`, and `email`. Do not change those names.
+2. Copy the form endpoint, which looks like `https://formspree.io/f/abcdwxyz`.
+3. Paste it into `suggestionEndpoint` in `site/config.js`.
+4. Commit that file and let the **Deploy to GitHub Pages** workflow finish. The button then posts to Formspree from the browser.
+
+To receive submissions with a Google Form:
+
+1. Create a form with the same five questions, in any order.
+2. Open the form, choose the three-dot menu, and click **Get pre-filled link**. Fill each answer with a placeholder, then copy the link. Each answer appears as `entry.#########=`.
+3. Set `suggestionEndpoint` to the form response URL: `https://docs.google.com/forms/d/e/FORM_ID/formResponse` (the public form link with `viewform` replaced by `formResponse`).
+4. Set `suggestionFields` to those entry ids:
+
+```javascript
+suggestionFields: {
+  building: "entry.1111111111",
+  category: "entry.2222222222",
+  location: "entry.3333333333",
+  note: "entry.4444444444",
+  email: "entry.5555555555",
+},
+```
+
+5. Commit `site/config.js` and wait for Pages to redeploy.
+
+No account is created by this repository. Until one of those addresses is filled in, sending a suggestion shows a short message and does not fail the page.
+
 ## Methodology
 
 ### What the team collected

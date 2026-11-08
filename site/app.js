@@ -1,4 +1,6 @@
-/* Texas A&M campus amenity map. Data is site/data/campus.json, built by scripts/build_dataset.py. */
+/* Texas A&M campus amenity map. Data is site/data/campus.json. */
+
+const MILE_METERS = 1609.344;
 
 const NOUN = {
   microwave: ["microwave", "microwaves"],
@@ -14,18 +16,18 @@ function noun(categoryId, count) {
 }
 
 const CONFIDENCE = {
-  explicit: "Number stated in the sheet",
-  presence_only: "Sheet says yes, counted as 1",
-  inferred_from_locations: "No number stated, counted as 1 per place listed",
-  unspecified: "Mentioned, but no number to add",
-  unconfirmed: "Sheet says this is not confirmed",
+  explicit: "",
+  presence_only: "Counted as 1",
+  inferred_from_locations: "Counted as 1 per place listed",
+  unspecified: "No count available",
+  unconfirmed: "Not confirmed",
 };
 
 const STUDY = {
   yes: "Yes",
   no: "No",
   not_really: "Not really",
-  unknown: "Not recorded",
+  unknown: "Not listed",
 };
 
 const PIN = {
@@ -34,6 +36,59 @@ const PIN = {
   empty: { color: "#fffdfb", weight: 2, fillColor: "#8d827b", fillOpacity: 0.92, radius: 7 },
 };
 
+const VISITOR_SWAPS = [
+  ["The team also calls this building Jackie B.", "Also known as Jackie B."],
+  [
+    'A second sheet row labeled Civil Engineering Building (DLEB) said "Floor 1, 2 microwaves". That row is this building. Those are the same 2 microwaves already listed on the 1st floor, so they were not counted again.',
+    "Also known as the Civil Engineering Building. The two first-floor microwaves are already included above.",
+  ],
+  [
+    "Chargers / lab equipment cell: 12th Man Technology store, lower level (a retail store, not a vending machine) This was not counted as a microwave, printer, lost and found, or snack or drink machine.",
+    "12th Man Technology is a retail store on the lower level, not a vending machine.",
+  ],
+  [
+    "Food vending cell: None. A marketplace with set hours instead. No snack vending machine was counted.",
+    "A marketplace with set hours is here. It is not a snack machine.",
+  ],
+  [
+    "Chargers / lab equipment cell: Tech vending machine on the 3rd floor This was not counted as a microwave, printer, lost and found, or snack or drink machine.",
+    "A tech vending machine is on the 3rd floor. It does not sell snacks or drinks.",
+  ],
+  [
+    "Notes: Bagel Block (a food spot). Not counted as a vending machine.",
+    "Bagel Block, a food counter, is in this building. It is not a vending machine.",
+  ],
+  ["The cell says yes rather than a number, so this is counted as 1.", "Listed as available. Counted as 1."],
+  ["The cell says this is not confirmed, so it is not included in campus totals.", "Not confirmed, so it is not included in the campus total."],
+  [
+    "No number was stated, so each listed place is counted as 1. The sheet says the exact spot was not given; the microwave is still treated as stated.",
+    "No exact number was given, so each place is counted as 1. The exact spot on this floor was not specified.",
+  ],
+  ["No number was stated, so each listed place is counted as 1.", "No exact number was given, so each place is counted as 1."],
+  ["No number was stated, so each named floor is counted as 1.", "No exact number was given, so each floor listed is counted as 1."],
+  ["No number was stated, so this is counted as 1.", "No exact number was given, so this is counted as 1."],
+  ["A place is described but no number is given, so this is counted as 1.", "A place is described, but no number was given, so this is counted as 1."],
+  ["Only a floor is stated, so this is counted as 1.", "Only a floor is listed, so this is counted as 1."],
+  ["No number of machines was stated, so this is one microwave per named floor.", "No number of machines was given, so this counts one microwave per floor listed."],
+  ["Microwaves are mentioned, but no number or list of places is given, so nothing was added to the campus total.", "Microwaves are mentioned, but no count was given, so they are not in the campus total."],
+  ["More than one place is described and no number is given, so each place is counted as 1.", "More than one place is listed and no number was given, so each place is counted as 1."],
+  ["The cell gives this total and then names the places, so the places were not counted again.", "This is the total for the places listed."],
+  ["Listed on a TAMU OAL line in the same cell as a separate printer total, so it was not added again.", "Also appears on the library print list and is not added again."],
+  [
+    "Medical Sciences Library: 1 printers listed but not added. Listed on a TAMU OAL line in the same cell as a separate printer total, so it was not added again.",
+    "Medical Sciences Library also lists 1 printer on the library print list. It is not added again.",
+  ],
+  [
+    'Mitchell Physics Building is not in the snack vending total: "Probably yes, 3rd floor (not confirmed)".',
+    "Mitchell Physics may have a snack machine on the 3rd floor. That is not confirmed, so it is not in the total.",
+  ],
+  [
+    "Academic Building mentions microwaves, but the sheet gives no number, so that row is not in the campus total.",
+    "Academic Building has microwaves, but no count was given, so they are not in the total.",
+  ],
+  ["TAMU OAL list", "Library print list"],
+];
+
 const state = {
   data: null,
   active: new Set(),
@@ -41,8 +96,8 @@ const state = {
   query: "",
   selectedId: null,
   markers: new Map(),
-  userMarker: null,
   map: null,
+  locationLayers: null,
 };
 
 function escapeHtml(value) {
@@ -53,6 +108,22 @@ function escapeHtml(value) {
     '"': "&quot;",
     "'": "&#39;",
   }[character]));
+}
+
+function visitorCopy(text) {
+  if (!text) return "";
+  let value = String(text);
+  for (const [from, to] of VISITOR_SWAPS) {
+    if (value.includes(from)) value = value.split(from).join(to);
+  }
+  return value
+    .replace(/^Notes:\s*/i, "")
+    .replace(/\bthe team\b/gi, "")
+    .replace(/\bdatathon\b/gi, "")
+    .replace(/\bthe sheet\b/gi, "the listing")
+    .replace(/\s{2,}/g, " ")
+    .replace(/\s+([.,])/g, "$1")
+    .trim();
 }
 
 function byId(id) {
@@ -98,31 +169,33 @@ function haversine(lat1, lon1, lat2, lon2) {
   return 2 * radius * Math.asin(Math.min(1, Math.sqrt(a)));
 }
 
-function usableForNearest(item) {
-  return item.confirmed && (item.include_in_total || item.count_confidence === "unspecified");
+function formatDistance(meters) {
+  const miles = meters / MILE_METERS;
+  if (miles < 0.1) return `${Math.max(1, Math.round(meters * 3.28084))} ft`;
+  if (miles < 10) return `${miles.toFixed(miles < 1 ? 2 : 1)} mi`;
+  return `${Math.round(miles)} mi`;
 }
 
-function nearestBuilding(latitude, longitude, category) {
-  let best = null;
-  for (const building of state.data.buildings) {
-    if (!building.mapped) continue;
-    if (!building.amenities.some((item) => item.category === category && usableForNearest(item))) continue;
-    const meters = haversine(latitude, longitude, building.latitude, building.longitude);
-    if (!best || meters < best.meters) best = { building, meters };
-  }
-  return best;
+function distancesFrom(latitude, longitude) {
+  return state.data.buildings
+    .filter((building) => building.mapped)
+    .map((building) => ({
+      building,
+      meters: haversine(latitude, longitude, building.latitude, building.longitude),
+    }))
+    .sort((left, right) => left.meters - right.meters);
 }
 
 function popupHtml(building) {
   const address = building.address ? ` · ${escapeHtml(building.address)}` : "";
-  const official = building.official_abbrev && building.official_abbrev !== building.sheet_abbrev
-    ? `Official code ${escapeHtml(building.official_abbrev)}. `
+  const also = building.official_abbrev && building.official_abbrev !== building.sheet_abbrev
+    ? `<br>Also labeled ${escapeHtml(building.official_abbrev)}`
     : "";
   let html = `<div class="popup"><h2>${escapeHtml(building.building_name)}</h2>`;
-  html += `<p class="meta">${escapeHtml(building.sheet_abbrev)}${address}<br>${official}Study friendly: ${escapeHtml(STUDY[building.study_friendly] || "Not recorded")}</p>`;
+  html += `<p class="meta">${escapeHtml(building.sheet_abbrev)}${address}${also}<br>Study friendly: ${escapeHtml(STUDY[building.study_friendly] || "Not listed")}</p>`;
 
   if (!building.amenities.length) {
-    html += "<p>No microwaves, snack machines, drink machines, printers, or lost and found were recorded for this building.</p>";
+    html += "<p>No microwaves, snack machines, drink machines, printers, or lost and found are listed here.</p>";
   }
 
   for (const category of state.data.categories) {
@@ -131,28 +204,33 @@ function popupHtml(building) {
     const counted = building.counts[category.id];
     html += `<h3>${escapeHtml(category.label)}${counted ? ` · ${counted}` : ""}</h3>`;
     for (const item of items) {
-      const countText = item.count == null ? "Number not stated" : String(item.count);
-      const place = item.location_detail ? escapeHtml(item.location_detail) : "Location not stated";
-      const section = item.section ? `<span class="confidence">${escapeHtml(item.section)}</span><br>` : "";
-      html += `<p class="item">${section}<span class="count">${escapeHtml(countText)}</span> — ${place}`;
-      if (item.restrictions) html += `<br><span class="restriction">Restriction: ${escapeHtml(item.restrictions)}</span>`;
-      const confidence = CONFIDENCE[item.count_confidence] || item.count_confidence;
-      html += `<br><span class="confidence">${escapeHtml(confidence)}</span>`;
-      if (!item.include_in_total && item.parse_notes) {
-        html += `<br><span class="confidence">${escapeHtml(item.parse_notes)}</span>`;
+      const countText = item.count == null ? "No count" : String(item.count);
+      let placeText = visitorCopy(item.location_detail);
+      if (item.count != null) {
+        placeText = placeText.replace(new RegExp(`^${item.count}\\s+microwaves?,\\s*`, "i"), "");
       }
+      const place = escapeHtml(placeText || "Location not listed");
+      const section = item.section ? `<span class="confidence">${escapeHtml(visitorCopy(item.section))}</span><br>` : "";
+      html += `<p class="item">${section}<span class="count">${escapeHtml(countText)}</span> — ${place}`;
+      if (item.restrictions) html += `<br><span class="restriction">Restriction: ${escapeHtml(visitorCopy(item.restrictions))}</span>`;
+      const note = visitorCopy(item.parse_notes);
+      const confidence = CONFIDENCE[item.count_confidence] || "";
+      if (note) html += `<br><span class="confidence">${escapeHtml(note)}</span>`;
+      else if (confidence) html += `<br><span class="confidence">${escapeHtml(confidence)}</span>`;
       html += "</p>";
     }
   }
 
-  if (building.other_mentions.length) {
-    html += `<div class="other"><h3>Written down, not counted in the five categories</h3>`;
-    for (const mention of building.other_mentions) html += `<p class="item">${escapeHtml(mention)}</p>`;
+  const mentions = building.other_mentions.map(visitorCopy).filter(Boolean);
+  if (mentions.length) {
+    html += `<div class="other"><h3>Other notes</h3>`;
+    for (const mention of mentions) html += `<p class="item">${escapeHtml(mention)}</p>`;
     html += "</div>";
   }
 
-  const pinSummary = building.mapped ? "Where this pin comes from" : "Why this building is not on the map";
-  html += `<details><summary>${pinSummary}</summary><p class="geo">${escapeHtml(building.geocode_notes)} ${escapeHtml(state.data.coordinate_note)}</p></details>`;
+  html += building.mapped
+    ? `<p class="geo">Location is approximate and marks the building, not a specific room.</p>`
+    : `<p class="geo">This building is not on the map yet.</p>`;
   html += "</div>";
   return html;
 }
@@ -165,7 +243,7 @@ function countLine(building) {
   }
   const flags = [];
   for (const item of building.amenities) {
-    if (item.count_confidence === "unspecified") flags.push(`${noun(item.category, 2)} mentioned, number not stated`);
+    if (item.count_confidence === "unspecified") flags.push(`${noun(item.category, 2)}, no count`);
     if (item.count_confidence === "unconfirmed") flags.push(`${noun(item.category, 2)} not confirmed`);
   }
   return { parts, flags: [...new Set(flags)] };
@@ -179,7 +257,6 @@ function renderTotals() {
     const row = document.createElement("div");
     row.className = "total-row";
     const label = document.createElement("span");
-    label.textContent = category.label;
     const buildings = total.buildings_with_counted.length === 1
       ? "1 building"
       : `${total.buildings_with_counted.length} buildings`;
@@ -193,7 +270,7 @@ function renderTotals() {
   notes.replaceChildren();
   for (const note of state.data.total_notes) {
     const item = document.createElement("li");
-    item.textContent = note;
+    item.textContent = visitorCopy(note);
     notes.append(item);
   }
 }
@@ -213,10 +290,8 @@ function renderDetail() {
 function renderList() {
   const root = document.getElementById("building-list");
   const buildings = visibleBuildings();
-  const mapped = buildings.filter((building) => building.mapped).length;
-  const totalMapped = state.data.buildings.filter((building) => building.mapped).length;
   document.getElementById("showing").textContent = buildings.length
-    ? `Showing ${buildings.length} of ${state.data.buildings.length} buildings in the sheet (${mapped} of ${totalMapped} mapped).`
+    ? `Showing ${buildings.length} of ${state.data.buildings.length} buildings.`
     : "No buildings match these filters.";
   root.replaceChildren();
   renderDetail();
@@ -234,7 +309,7 @@ function renderList() {
     button.setAttribute("role", "listitem");
     button.setAttribute("aria-current", building.building_id === state.selectedId ? "true" : "false");
     const { parts, flags } = countLine(building);
-    const line = parts.length ? parts.join(" · ") : "Nothing counted in the five categories";
+    const line = parts.length ? parts.join(" · ") : "Nothing listed yet";
     const tags = [
       `Study friendly: ${STUDY[building.study_friendly]}`,
       ...flags,
@@ -274,6 +349,13 @@ function syncMarkers() {
   for (const [id, marker] of state.markers) marker.setStyle(styleFor(byId(id)));
 }
 
+function syncToggleButtons() {
+  document.querySelectorAll(".toggle").forEach((button) => {
+    const match = state.data.categories.find((item) => item.label === button.textContent);
+    if (match) button.setAttribute("aria-pressed", state.active.has(match.id) ? "true" : "false");
+  });
+}
+
 function select(id, openPopup) {
   state.selectedId = id;
   renderList();
@@ -291,11 +373,214 @@ function select(id, openPopup) {
   if (current && !openPopup) current.scrollIntoView({ block: "nearest" });
 }
 
+function revealAndSelect(id) {
+  const building = byId(id);
+  state.studyOnly = false;
+  document.getElementById("study-only").checked = false;
+  if (!building.amenities.length) {
+    for (const category of state.data.categories) state.active.add(category.id);
+  } else {
+    for (const item of building.amenities) state.active.add(item.category);
+  }
+  syncToggleButtons();
+  select(id, true);
+}
+
+function renderNearby(ranked) {
+  const list = document.getElementById("nearby-list");
+  const status = document.getElementById("location-status");
+  const nearby = ranked.filter((item) => item.meters <= MILE_METERS);
+  list.replaceChildren();
+  if (!nearby.length) {
+    list.hidden = true;
+    const closest = ranked[0];
+    status.textContent = closest
+      ? `No buildings on this map are within 1 mile. The closest is ${closest.building.building_name}, about ${formatDistance(closest.meters)} away.`
+      : "No buildings on this map are within 1 mile.";
+    return;
+  }
+  status.textContent = nearby.length === 1
+    ? "1 building within 1 mile."
+    : `${nearby.length} buildings within 1 mile.`;
+  list.hidden = false;
+  for (const item of nearby) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "building";
+    button.innerHTML = `<strong>${escapeHtml(item.building.building_name)}</strong><span class="sub">${escapeHtml(formatDistance(item.meters))} away</span>`;
+    button.addEventListener("click", () => revealAndSelect(item.building.building_id));
+    list.append(button);
+  }
+}
+
+function showLocation(position) {
+  const { latitude, longitude, accuracy } = position.coords;
+  state.locationLayers.clearLayers();
+  if (typeof accuracy === "number" && accuracy > 0) {
+    L.circle([latitude, longitude], {
+      radius: accuracy,
+      color: "#1f4e79",
+      weight: 1,
+      fillColor: "#1f4e79",
+      fillOpacity: 0.12,
+      interactive: false,
+    }).addTo(state.locationLayers);
+  }
+  const mile = L.circle([latitude, longitude], {
+    radius: MILE_METERS,
+    color: "#500000",
+    weight: 2,
+    dashArray: "7 7",
+    fillColor: "#500000",
+    fillOpacity: 0.04,
+    interactive: false,
+  }).addTo(state.locationLayers);
+  const marker = L.circleMarker([latitude, longitude], {
+    radius: 8,
+    color: "#fffdfb",
+    weight: 3,
+    fillColor: "#1f4e79",
+    fillOpacity: 1,
+  }).addTo(state.locationLayers);
+  marker.bindTooltip("You are here", { permanent: true, direction: "right", offset: [8, 0] });
+  const ranked = distancesFrom(latitude, longitude);
+  renderNearby(ranked);
+  const bounds = mile.getBounds();
+  if (!ranked.some((item) => item.meters <= MILE_METERS) && ranked[0]) {
+    bounds.extend([ranked[0].building.latitude, ranked[0].building.longitude]);
+  }
+  state.map.fitBounds(bounds, { padding: [28, 28], maxZoom: 16 });
+}
+
+function locateUser() {
+  const status = document.getElementById("location-status");
+  if (!navigator.geolocation) {
+    status.textContent = "Location is not available in this browser. Search still works.";
+    return;
+  }
+  status.textContent = "Finding your location…";
+  navigator.geolocation.getCurrentPosition(showLocation, (error) => {
+    document.getElementById("nearby-list").hidden = true;
+    if (error.code === 1) {
+      status.textContent = "Location permission was denied. You can still search by building name.";
+    } else if (error.code === 3) {
+      status.textContent = "Location took too long. Try again, or search by building name.";
+    } else {
+      status.textContent = "Location is unavailable right now. You can still search by building name.";
+    }
+  }, { enableHighAccuracy: true, timeout: 12000, maximumAge: 0 });
+}
+
+function siteConfig() {
+  return window.SITE_CONFIG || {};
+}
+
+function suggestionStatus(kind) {
+  if (kind === "sent" || kind === "google") return "Thanks. Your suggestion was sent.";
+  if (kind === "mailto") return "Your email app should open with this note.";
+  if (kind === "google-unmapped") return "A Google Form address is set, but the question IDs are missing. The connection steps are in the project README.";
+  if (kind === "unconfigured") return "Suggestions are not connected yet. You can still use the map.";
+  return "The suggestion could not be sent. Try again in a moment.";
+}
+
+function postGoogleForm(endpoint, fields, payload) {
+  const form = document.createElement("form");
+  form.method = "POST";
+  form.action = endpoint;
+  form.target = "suggest-frame";
+  form.hidden = true;
+  const add = (name, value) => {
+    if (!name) return;
+    const input = document.createElement("input");
+    input.name = name;
+    input.value = value || "";
+    form.append(input);
+  };
+  add(fields.building, payload.building);
+  add(fields.category, payload.category);
+  add(fields.location, payload.location);
+  add(fields.note, payload.note);
+  add(fields.email, payload.email);
+  add("submit", "Submit");
+  document.body.append(form);
+  form.submit();
+  form.remove();
+}
+
+async function sendSuggestion(payload) {
+  const endpoint = String(siteConfig().suggestionEndpoint || "").trim();
+  const email = String(siteConfig().contactEmail || "").trim();
+  const fields = siteConfig().suggestionFields;
+  if (!endpoint) {
+    if (!email) return "unconfigured";
+    const lines = [
+      `Building: ${payload.building}`,
+      `Category: ${payload.category}`,
+      `Location: ${payload.location}`,
+      payload.note ? `Note: ${payload.note}` : "",
+      payload.email ? `From: ${payload.email}` : "",
+    ].filter(Boolean);
+    window.location.href = `mailto:${email}?subject=${encodeURIComponent("Campus amenity update")}&body=${encodeURIComponent(lines.join("\n"))}`;
+    return "mailto";
+  }
+  if (/docs\.google\.com\/forms/i.test(endpoint)) {
+    if (!fields || !fields.building || !fields.category || !fields.location) return "google-unmapped";
+    postGoogleForm(endpoint, fields, payload);
+    return "google";
+  }
+  const response = await fetch(endpoint, {
+    method: "POST",
+    headers: { Accept: "application/json", "Content-Type": "application/json" },
+    body: JSON.stringify({
+      building: payload.building,
+      category: payload.category,
+      location: payload.location,
+      note: payload.note,
+      email: payload.email,
+      _subject: "Campus amenity suggestion",
+    }),
+  });
+  if (!response.ok) throw new Error(String(response.status));
+  return "sent";
+}
+
+function wireSuggestions() {
+  const dialog = document.getElementById("suggest-dialog");
+  const form = document.getElementById("suggest-form");
+  const status = document.getElementById("suggest-status");
+  document.getElementById("suggest-open").addEventListener("click", () => {
+    status.textContent = "";
+    if (typeof dialog.showModal === "function") dialog.showModal();
+    else dialog.setAttribute("open", "");
+  });
+  document.getElementById("suggest-cancel").addEventListener("click", () => {
+    dialog.close();
+  });
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const payload = {
+      building: document.getElementById("suggest-building").value.trim(),
+      category: document.getElementById("suggest-category").value,
+      location: document.getElementById("suggest-location").value.trim(),
+      note: document.getElementById("suggest-note").value.trim(),
+      email: document.getElementById("suggest-email").value.trim(),
+    };
+    const submit = form.querySelector('button[type="submit"]');
+    submit.disabled = true;
+    try {
+      status.textContent = suggestionStatus(await sendSuggestion(payload));
+      if (status.textContent.startsWith("Thanks")) form.reset();
+    } catch (error) {
+      status.textContent = suggestionStatus("error");
+    } finally {
+      submit.disabled = false;
+    }
+  });
+}
+
 function renderToggles() {
   const root = document.getElementById("toggles");
-  const select = document.getElementById("nearest-category");
   root.replaceChildren();
-  select.replaceChildren();
   for (const category of state.data.categories) {
     state.active.add(category.id);
     const button = document.createElement("button");
@@ -312,10 +597,6 @@ function renderToggles() {
       syncMarkers();
     });
     root.append(button);
-    const option = document.createElement("option");
-    option.value = category.id;
-    option.textContent = category.label;
-    select.append(option);
   }
 }
 
@@ -332,65 +613,21 @@ function wireControls() {
     renderList();
     syncMarkers();
   });
-  document.getElementById("locate").addEventListener("click", () => {
-    const result = document.getElementById("nearest-result");
-    if (!navigator.geolocation) {
-      result.textContent = "This browser does not share a location. Search still works.";
-      return;
-    }
-    result.textContent = "Asking for your location…";
-    navigator.geolocation.getCurrentPosition((position) => {
-      const { latitude, longitude } = position.coords;
-      if (state.userMarker) state.userMarker.remove();
-      state.userMarker = L.circleMarker([latitude, longitude], {
-        radius: 7,
-        color: "#1f4e79",
-        weight: 2,
-        fillColor: "#7eb6e0",
-        fillOpacity: 0.95,
-      }).addTo(state.map).bindTooltip("You");
-      const category = document.getElementById("nearest-category").value;
-      state.studyOnly = false;
-      document.getElementById("study-only").checked = false;
-      state.active.add(category);
-      document.querySelectorAll(".toggle").forEach((button) => {
-        const match = state.data.categories.find((item) => item.label === button.textContent);
-        if (match) button.setAttribute("aria-pressed", state.active.has(match.id) ? "true" : "false");
-      });
-      const label = state.data.categories.find((item) => item.id === category).label.toLowerCase();
-      const found = nearestBuilding(latitude, longitude, category);
-      const skipped = state.data.buildings
-        .filter((building) => !building.mapped && building.amenities.some((item) => item.category === category && usableForNearest(item)))
-        .map((building) => building.building_name);
-      if (!found) {
-        result.textContent = `No mapped building has confirmed ${label}.`;
-        return;
-      }
-      const meters = Math.round(found.meters);
-      const distance = meters < 1000 ? `${meters} m` : `${(meters / 1000).toFixed(2)} km`;
-      let text = `${found.building.building_name} is the closest mapped building with ${label}, about ${distance} in a straight line, not a walking route.`;
-      const vague = found.building.amenities.some((item) => item.category === category && item.count_confidence === "unspecified");
-      if (vague) text += " The sheet does not say how many.";
-      if (skipped.length) text += ` Skipped because they are not on the map: ${skipped.join(", ")}.`;
-      result.textContent = text;
-      select(found.building.building_id, true);
-    }, (error) => {
-      result.textContent = error.code === 1
-        ? "Location permission was denied. Search still works without it."
-        : "The browser could not determine a location.";
-    }, { enableHighAccuracy: true, timeout: 12000, maximumAge: 60000 });
-  });
+  document.getElementById("locate").addEventListener("click", locateUser);
+  wireSuggestions();
 }
 
 function showProblem(error) {
   const box = document.getElementById("load-error");
   box.hidden = false;
-  box.textContent = error && (error.stack || error.message) ? (error.stack || error.message) : String(error);
+  box.textContent = "The map did not load. Refresh the page.";
+  console.error(error);
 }
 
 function start(data) {
   state.data = data;
   state.map = L.map("map", { scrollWheelZoom: true }).setView([30.6155, -96.3415], 15);
+  state.locationLayers = L.layerGroup().addTo(state.map);
   L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
     maxZoom: 19,
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
