@@ -70,12 +70,12 @@ function pinIcon(building) {
   if (!kinds.length) kinds.push("empty");
   const selected = building.building_id === state.selectedId;
   const dots = kinds.map((kind) => `<span class="pin-dot pin-${kind}"></span>`).join("");
-  const width = kinds.length * 12 + 8;
+  const width = kinds.length * 17 - 5;
   return L.divIcon({
     className: "pin-wrap",
     html: `<div class="pin-mark${selected ? " is-selected" : ""}">${dots}</div>`,
-    iconSize: [width, 22],
-    iconAnchor: [width / 2, 11],
+    iconSize: [Math.max(width, 12), 14],
+    iconAnchor: [Math.max(width, 12) / 2, 7],
   });
 }
 
@@ -162,6 +162,8 @@ function visitorCopy(text) {
   }
   return value
     .replace(/^Notes:\s*/i, "")
+    .replace(/^Chargers \/ lab equipment cell:\s*/i, "")
+    .replace(/\s*This was not counted as a microwave, printer, lost and found, or snack or drink machine\.?/gi, "")
     .replace(/\bthe team\b/gi, "")
     .replace(/\bdatathon\b/gi, "")
     .replace(/\bthe sheet\b/gi, "the listing")

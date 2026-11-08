@@ -47,42 +47,45 @@
       ]
     },
     "snack_vending": {
-      "counted": 5,
+      "counted": 6,
       "buildings_with_counted": [
         "Memorial Student Center",
         "Dwight Look Engineering Building",
         "J. Mike Walker '66 Department of Mechanical Engineering",
         "Blocker Building",
-        "Emerging Technologies Building"
+        "Emerging Technologies Building",
+        "Heldenfels Hall"
       ],
       "unconfirmed": 1,
       "unspecified_buildings": []
     },
     "drink_vending": {
-      "counted": 12,
+      "counted": 13,
       "buildings_with_counted": [
         "Memorial Student Center",
         "Rudder",
         "Dwight Look Engineering Building",
         "J. Mike Walker '66 Department of Mechanical Engineering",
         "Blocker Building",
-        "Emerging Technologies Building"
+        "Emerging Technologies Building",
+        "Heldenfels Hall"
       ],
       "unconfirmed": 0,
       "unspecified_buildings": []
     },
     "lost_and_found": {
-      "counted": 4,
+      "counted": 5,
       "buildings_with_counted": [
         "Memorial Student Center",
         "Innovative Learning Classroom Building",
-        "Blocker Building"
+        "Blocker Building",
+        "E.L. Wehner Building and Cox Hall"
       ],
       "unconfirmed": 0,
       "unspecified_buildings": []
     },
     "printer": {
-      "counted": 44,
+      "counted": 45,
       "buildings_with_counted": [
         "Memorial Student Center",
         "Innovative Learning Classroom Building",
@@ -95,7 +98,8 @@
         "Blocker Building",
         "Emerging Technologies Building",
         "West Campus Library",
-        "Evans Library"
+        "Evans Library",
+        "E.L. Wehner Building and Cox Hall"
       ],
       "unconfirmed": 0,
       "unspecified_buildings": []
@@ -1799,6 +1803,161 @@
         "microwave": 0,
         "snack_vending": 0,
         "drink_vending": 0,
+        "lost_and_found": 0,
+        "printer": 0
+      }
+    },
+    {
+      "building_id": "annex",
+      "building_name": "Annex",
+      "sheet_abbrev": "",
+      "official_name": "",
+      "official_abbrev": "",
+      "gis_building_number": "",
+      "address": "",
+      "latitude": null,
+      "longitude": null,
+      "mapped": false,
+      "coordinate_method": "unresolved",
+      "coordinate_source": "Texas A&M Facilities Coordination GIS, University Building layer (FCOR/TAMU_BaseMap_060826)",
+      "source_url": "https://gis.tamu.edu/arcgis/rest/services/FCOR/TAMU_BaseMap_060826/MapServer/2",
+      "retrieved_on": "2026-11-08",
+      "geocode_notes": "The sheet names only Annex and says technology can be checked out. The campus GIS has several annexes, including Evans Library Annex and Computing Services Annex. The sheet does not say which one this is, so it is not pinned.",
+      "study_friendly": "unknown",
+      "study_friendly_raw": "",
+      "sheet_notes": "",
+      "other_mentions": [
+        "Chargers / lab equipment cell: Can check out technology This was not counted as a microwave, printer, lost and found, or snack or drink machine."
+      ],
+      "amenities": [],
+      "counts": {
+        "microwave": 0,
+        "snack_vending": 0,
+        "drink_vending": 0,
+        "lost_and_found": 0,
+        "printer": 0
+      }
+    },
+    {
+      "building_id": "wcba",
+      "building_name": "E.L. Wehner Building and Cox Hall",
+      "sheet_abbrev": "WCBA",
+      "official_name": "Wehner Building",
+      "official_abbrev": "WCBA",
+      "gis_building_number": "1510",
+      "address": "210 Olsen Blvd",
+      "latitude": 30.610607,
+      "longitude": -96.350805,
+      "mapped": true,
+      "coordinate_method": "gis_point",
+      "coordinate_source": "Texas A&M Facilities Coordination GIS, University Building layer (FCOR/TAMU_BaseMap_060826)",
+      "source_url": "https://gis.tamu.edu/arcgis/rest/services/FCOR/TAMU_BaseMap_060826/MapServer/2",
+      "retrieved_on": "2026-11-08",
+      "geocode_notes": "The sheet abbreviation WCBA matches the Wehner Building. The sheet also names Cox Hall. No GIS building is named Cox Hall, so both names share this pin.",
+      "study_friendly": "unknown",
+      "study_friendly_raw": "",
+      "sheet_notes": "",
+      "other_mentions": [],
+      "amenities": [
+        {
+          "category": "lost_and_found",
+          "section": "",
+          "count": 1,
+          "count_confidence": "inferred_from_locations",
+          "confirmed": true,
+          "include_in_total": true,
+          "location_detail": "Room 156",
+          "restrictions": "",
+          "raw_text": "Room 156",
+          "parse_notes": "A place is described but no number is given, so this is counted as 1.",
+          "amenity_id": "wcba-lost_and_found-1",
+          "building_id": "wcba",
+          "building_name": "E.L. Wehner Building and Cox Hall",
+          "sheet_abbrev": "WCBA"
+        },
+        {
+          "category": "printer",
+          "section": "",
+          "count": 1,
+          "count_confidence": "inferred_from_locations",
+          "confirmed": true,
+          "include_in_total": true,
+          "location_detail": "Yes",
+          "restrictions": "",
+          "raw_text": "Yes",
+          "parse_notes": "No number was stated, so this listed place is counted as 1.",
+          "amenity_id": "wcba-printer-2",
+          "building_id": "wcba",
+          "building_name": "E.L. Wehner Building and Cox Hall",
+          "sheet_abbrev": "WCBA"
+        }
+      ],
+      "counts": {
+        "microwave": 0,
+        "snack_vending": 0,
+        "drink_vending": 0,
+        "lost_and_found": 1,
+        "printer": 1
+      }
+    },
+    {
+      "building_id": "held",
+      "building_name": "Heldenfels Hall",
+      "sheet_abbrev": "HELD",
+      "official_name": "Heldenfels Hall",
+      "official_abbrev": "HELD",
+      "gis_building_number": "0521",
+      "address": "466 Nagle St",
+      "latitude": 30.615123,
+      "longitude": -96.33869,
+      "mapped": true,
+      "coordinate_method": "gis_point",
+      "coordinate_source": "Texas A&M Facilities Coordination GIS, University Building layer (FCOR/TAMU_BaseMap_060826)",
+      "source_url": "https://gis.tamu.edu/arcgis/rest/services/FCOR/TAMU_BaseMap_060826/MapServer/2",
+      "retrieved_on": "2026-11-08",
+      "geocode_notes": "Name and abbreviation match Heldenfels Hall.",
+      "study_friendly": "unknown",
+      "study_friendly_raw": "",
+      "sheet_notes": "",
+      "other_mentions": [],
+      "amenities": [
+        {
+          "category": "snack_vending",
+          "section": "",
+          "count": 1,
+          "count_confidence": "inferred_from_locations",
+          "confirmed": true,
+          "include_in_total": true,
+          "location_detail": "Yes 1st floor",
+          "restrictions": "",
+          "raw_text": "Yes 1st floor",
+          "parse_notes": "No number was stated, so this is counted as 1.",
+          "amenity_id": "held-snack_vending-1",
+          "building_id": "held",
+          "building_name": "Heldenfels Hall",
+          "sheet_abbrev": "HELD"
+        },
+        {
+          "category": "drink_vending",
+          "section": "",
+          "count": 1,
+          "count_confidence": "inferred_from_locations",
+          "confirmed": true,
+          "include_in_total": true,
+          "location_detail": "Yes 1st floor",
+          "restrictions": "",
+          "raw_text": "Yes 1st floor",
+          "parse_notes": "No number was stated, so this is counted as 1.",
+          "amenity_id": "held-drink_vending-2",
+          "building_id": "held",
+          "building_name": "Heldenfels Hall",
+          "sheet_abbrev": "HELD"
+        }
+      ],
+      "counts": {
+        "microwave": 0,
+        "snack_vending": 1,
+        "drink_vending": 1,
         "lost_and_found": 0,
         "printer": 0
       }

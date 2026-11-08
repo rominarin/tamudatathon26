@@ -109,6 +109,8 @@ suggestionFields: {
 
 No account is created by this repository. Until `suggestionEndpoint` is filled in, suggestions are not stored anywhere.
 
+The owner’s Google Form (`https://docs.google.com/forms/d/1i4OHLlbgIFdwrAnfZ2fKHYUki6eVpaA1molErA3m_xA/edit`) is not publicly reachable: opening it without signing in returns “Unauthorized,” so the site cannot read its questions or post to it. `suggestionEndpoint` stays empty until that changes. In the form, open **Settings → Responses**, turn off any restriction that limits responses to signed-in users in an organization, and make sure responses are being accepted. Then use **Send → Link** and confirm the link opens in a private window without a Google sign-in. That public link looks like `https://docs.google.com/forms/d/e/.../viewform`. After it is public, the `entry.` ids can be copied from a pre-filled link and set in `site/config.js`.
+
 ## Methodology
 
 ### What the team collected
@@ -142,10 +144,10 @@ Campus totals from this parse:
 | Category | Counted | Also in the sheet, not in the count |
 | --- | ---: | --- |
 | Microwaves | 19 | Academic Building, number not stated |
-| Snack vending | 5 | Mitchell Physics, “Probably yes, 3rd floor (not confirmed)” |
-| Drink vending | 12 | |
-| Lost and found | 4 | |
-| Printers | 44 | Medical Sciences Library, 1 OAL printer not added to the 3 already stated |
+| Snack vending | 6 | Mitchell Physics, “Probably yes, 3rd floor (not confirmed)” |
+| Drink vending | 13 | |
+| Lost and found | 5 | |
+| Printers | 45 | Medical Sciences Library, 1 OAL printer not added to the 3 already stated |
 
 ### Where the coordinates came from
 
@@ -167,6 +169,9 @@ These name decisions are in the coordinate file, and on each pin:
 - Student Recreation Center is SREC, not the Southside Recreation Center.
 - EIC is the Engineering Innovation Center at 233 Ireland St. Blocker is 155 Ireland St, which matches the sheet’s “building next to Blocker”.
 - West Campus Library is the GIS building of that name, not the Wehner Building. BARC is not a separate building in the layer.
+- Heldenfels Hall matches the GIS building HELD.
+- “E.L. Wehner Building and Cox Hall” uses the sheet abbreviation WCBA, so the pin is the Wehner Building. Cox Hall is not a separate building in the GIS layer.
+- The row named only “Annex” is not pinned. The GIS layer has several annexes, and the sheet does not say which one.
 
 ## Limitations
 

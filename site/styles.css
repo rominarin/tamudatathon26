@@ -210,22 +210,23 @@ h1 {
 .pin-mark {
   display: flex;
   align-items: center;
-  gap: 2px;
-  height: 18px;
-  padding: 2px 4px;
-  background: #fffdfb;
-  border: 2px solid #500000;
-  border-radius: 999px;
-  box-shadow: 0 1px 3px rgba(36, 24, 22, 0.28);
+  gap: 5px;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  padding: 0;
 }
 
-.pin-mark.is-selected { border-color: #1f4e79; }
-
 .pin-dot {
-  width: 9px;
-  height: 9px;
+  width: 12px;
+  height: 12px;
   border-radius: 50%;
   background: #8d827b;
+  box-shadow: 0 0 0 1.5px #fff;
+}
+
+.pin-mark.is-selected .pin-dot {
+  box-shadow: 0 0 0 2px #1f4e79;
 }
 
 .pin-microwave { background: #9a3412; }
