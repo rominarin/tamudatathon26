@@ -282,13 +282,6 @@ function renderTotals() {
     row.append(label, value);
     root.append(row);
   }
-  const notes = document.getElementById("total-notes");
-  notes.replaceChildren();
-  for (const note of state.data.total_notes) {
-    const item = document.createElement("li");
-    item.textContent = visitorCopy(note);
-    notes.append(item);
-  }
 }
 
 function renderDetail() {
