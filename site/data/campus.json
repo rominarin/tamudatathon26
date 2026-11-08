@@ -27,17 +27,17 @@
   ],
   "totals": {
     "microwave": {
-      "counted": 18,
+      "counted": 19,
       "buildings_with_counted": [
         "Memorial Student Center",
         "Zachry Engineering Education Complex",
         "Peterson Building",
+        "Jack E. Brown Chemical Engineering Building",
         "Dwight Look Engineering Building",
         "Medical Sciences Library",
         "EIC (building next to Blocker)",
         "Blocker Building",
         "Emerging Technologies Building",
-        "Civil Engineering Building",
         "Interdisciplinary Life Sciences Building",
         "Hotard Hall"
       ],
@@ -676,12 +676,30 @@
       "coordinate_source": "Texas A&M Facilities Coordination GIS, University Building layer (FCOR/TAMU_BaseMap_060826)",
       "source_url": "https://gis.tamu.edu/arcgis/rest/services/FCOR/TAMU_BaseMap_060826/MapServer/2",
       "retrieved_on": "2026-11-08",
-      "geocode_notes": "Official GIS abbreviation is CHEN. The sheet abbreviation is JEB. The building name matches.",
+      "geocode_notes": "Official GIS abbreviation is CHEN. The sheet abbreviation is JEB. The team also calls this building Jackie B. The building name matches Jack E. Brown Chemical Engineering Building. Three microwaves inside the glass door lounge were added on this existing row. Coordinates are the same TAMU GIS point as before.",
       "study_friendly": "no",
       "study_friendly_raw": "No",
-      "sheet_notes": "",
-      "other_mentions": [],
+      "sheet_notes": "The team also calls this building Jackie B.",
+      "other_mentions": [
+        "Notes: The team also calls this building Jackie B."
+      ],
       "amenities": [
+        {
+          "category": "microwave",
+          "section": "",
+          "count": 3,
+          "count_confidence": "explicit",
+          "confirmed": true,
+          "include_in_total": true,
+          "location_detail": "3 microwaves, inside the glass door lounge",
+          "restrictions": "",
+          "raw_text": "3 microwaves, inside the glass door lounge",
+          "parse_notes": "",
+          "amenity_id": "jeb-microwave-1",
+          "building_id": "jeb",
+          "building_name": "Jack E. Brown Chemical Engineering Building",
+          "sheet_abbrev": "JEB"
+        },
         {
           "category": "printer",
           "section": "",
@@ -693,14 +711,14 @@
           "restrictions": "",
           "raw_text": "1 Color MFP Printer in Room 118",
           "parse_notes": "",
-          "amenity_id": "jeb-printer-1",
+          "amenity_id": "jeb-printer-2",
           "building_id": "jeb",
           "building_name": "Jack E. Brown Chemical Engineering Building",
           "sheet_abbrev": "JEB"
         }
       ],
       "counts": {
-        "microwave": 0,
+        "microwave": 3,
         "snack_vending": 0,
         "drink_vending": 0,
         "lost_and_found": 0,
@@ -722,11 +740,13 @@
       "coordinate_source": "Texas A&M Facilities Coordination GIS, University Building layer (FCOR/TAMU_BaseMap_060826)",
       "source_url": "https://gis.tamu.edu/arcgis/rest/services/FCOR/TAMU_BaseMap_060826/MapServer/2",
       "retrieved_on": "2026-11-08",
-      "geocode_notes": "The building name matches Dwight Look Engineering Building. The official abbreviation is DLEB, not DWEB. A separate sheet row named Civil Engineering Building also uses DLEB. Those rows were not merged.",
+      "geocode_notes": "The building name matches Dwight Look Engineering Building. The official abbreviation is DLEB. The sheet abbreviated this row DWEB and also had a row labeled Civil Engineering Building with code DLEB. That second row was merged here. Its \"Floor 1, 2 microwaves\" matches the 2 microwaves already on the 1st floor, so the count stays 2.",
       "study_friendly": "yes",
       "study_friendly_raw": "Yes",
-      "sheet_notes": "",
-      "other_mentions": [],
+      "sheet_notes": "A second sheet row labeled Civil Engineering Building (DLEB) said \"Floor 1, 2 microwaves\". That row is this building. Those are the same 2 microwaves already listed on the 1st floor, so they were not counted again.",
+      "other_mentions": [
+        "Notes: A second sheet row labeled Civil Engineering Building (DLEB) said \"Floor 1, 2 microwaves\". That row is this building. Those are the same 2 microwaves already listed on the 1st floor, so they were not counted again."
+      ],
       "amenities": [
         {
           "category": "microwave",
@@ -1310,52 +1330,6 @@
       ],
       "counts": {
         "microwave": 0,
-        "snack_vending": 0,
-        "drink_vending": 0,
-        "lost_and_found": 0,
-        "printer": 0
-      }
-    },
-    {
-      "building_id": "dleb",
-      "building_name": "Civil Engineering Building",
-      "sheet_abbrev": "DLEB",
-      "official_name": "",
-      "official_abbrev": "",
-      "gis_building_number": "",
-      "address": "",
-      "latitude": null,
-      "longitude": null,
-      "mapped": false,
-      "coordinate_method": "unresolved",
-      "coordinate_source": "Texas A&M Facilities Coordination GIS, University Building layer (FCOR/TAMU_BaseMap_060826)",
-      "source_url": "https://gis.tamu.edu/arcgis/rest/services/FCOR/TAMU_BaseMap_060826/MapServer/2",
-      "retrieved_on": "2026-11-08",
-      "geocode_notes": "Not placed. No GIS building is named Civil Engineering Building. The sheet abbreviation DLEB is the official code for Dwight Look Engineering Building, which is already mapped from a separate row. CVE Lab Building (CVLB, 233 Spence St) was not used, because the sheet does not name it.",
-      "study_friendly": "unknown",
-      "study_friendly_raw": "",
-      "sheet_notes": "",
-      "other_mentions": [],
-      "amenities": [
-        {
-          "category": "microwave",
-          "section": "",
-          "count": 2,
-          "count_confidence": "explicit",
-          "confirmed": true,
-          "include_in_total": true,
-          "location_detail": "Floor 1, 2 microwaves",
-          "restrictions": "",
-          "raw_text": "Floor 1, 2 microwaves",
-          "parse_notes": "",
-          "amenity_id": "dleb-microwave-1",
-          "building_id": "dleb",
-          "building_name": "Civil Engineering Building",
-          "sheet_abbrev": "DLEB"
-        }
-      ],
-      "counts": {
-        "microwave": 2,
         "snack_vending": 0,
         "drink_vending": 0,
         "lost_and_found": 0,
