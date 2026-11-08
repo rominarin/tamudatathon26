@@ -150,33 +150,33 @@ h1 {
   margin: 0.7rem 0 0.2rem;
 }
 
-.nearest { margin-top: 0.7rem; }
-
-.nearest label {
-  display: block;
-  margin-bottom: 0.3rem;
-  font-size: 0.75rem;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--muted);
+.product-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.75rem;
 }
 
-.nearest-row { display: flex; gap: 0.4rem; }
-
-.nearest-row select { flex: 1; }
-
-.nearest-row button, .building {
+.product-actions button, .suggest-actions button, .building {
   cursor: pointer;
 }
 
-.nearest-row button {
+.product-actions button, .suggest-actions button {
   border: 1px solid var(--maroon);
   background: var(--maroon);
   color: #fffaf6;
   border-radius: 8px;
-  padding: 0.45rem 0.7rem;
-  white-space: nowrap;
+  padding: 0.5rem 0.75rem;
 }
+
+button.secondary, .product-actions button.secondary {
+  background: var(--card);
+  color: var(--maroon);
+}
+
+.nearby-list { margin: 0.35rem 0 0.6rem; }
+
+.optional { color: var(--muted); font-weight: 400; }
 
 .hint, .legend, .empty {
   color: var(--muted);
@@ -326,6 +326,47 @@ h1 {
 
 .popup details { margin-top: 0.45rem; font-size: 0.82rem; }
 
+dialog {
+  border: 0;
+  border-radius: 14px;
+  padding: 0;
+  width: min(28rem, calc(100% - 1.5rem));
+  max-height: calc(100% - 1.5rem);
+  background: var(--card);
+  color: var(--ink);
+  box-shadow: 0 16px 40px rgba(36, 24, 22, 0.28);
+}
+
+dialog::backdrop { background: rgba(36, 24, 22, 0.45); }
+
+.suggest-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  padding: 1rem 1rem 1.1rem;
+  overflow: auto;
+  max-height: calc(100vh - 2rem);
+}
+
+.suggest-form h2 {
+  margin: 0;
+  font-family: Georgia, "Iowan Old Style", serif;
+  font-size: 1.35rem;
+}
+
+.suggest-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.88rem;
+}
+
+.suggest-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.45rem;
+}
+
 @media (max-width: 860px) {
   .app { height: auto; min-height: 100%; }
   .top { flex-direction: column; align-items: start; gap: 0.45rem; }
@@ -334,4 +375,6 @@ h1 {
   .panel { border-right: 0; border-top: 1px solid var(--line); }
   .panel-scroll { overflow: visible; min-height: 0; }
   .leaflet-popup-content { width: 230px; }
+  .product-actions button { flex: 1 1 9rem; }
+  .suggest-actions button { min-height: 2.6rem; }
 }
