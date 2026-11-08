@@ -36,6 +36,21 @@ const PIN = {
   empty: { color: "#fffdfb", weight: 2, fillColor: "#8d827b", fillOpacity: 0.92, radius: 7 },
 };
 
+const ICONS = {
+  microwave: '<rect x="3" y="5" width="13" height="14" rx="1.5"/><path d="M8 5v14"/><circle class="fill" cx="5.4" cy="9" r="0.7"/><path d="M18.2 9.2c1 .9 1 2 0 2.9M20.2 7.6c1.8 1.6 1.8 3.8 0 5.4"/>',
+  snack_vending: '<path d="M8 8.5h8l1.1 11H6.9L8 8.5z"/><path d="M9.2 8.5c.2-2.2 1.3-3.5 2.8-3.5s2.6 1.3 2.8 3.5"/><path d="M9 12.2h6"/>',
+  drink_vending: '<path d="M7.2 8h8.2l-.9 11H8.1L7.2 8z"/><path d="M15.4 9.2h2a2 2 0 0 1 0 4h-2"/><path d="M9.2 4.6c.5.8.5 1.5 0 2.3M12 4.2c.5.8.5 1.5 0 2.3"/>',
+  lost_and_found: '<path d="M4 9.5h16V19H4z"/><path d="M4 9.5 7.2 5.5h9.6L20 9.5"/><path d="M12 5.5v4"/><circle class="fill" cx="12" cy="14.2" r="1.1"/>',
+  printer: '<path d="M7 4h10v4H7z"/><rect x="4" y="8" width="16" height="7" rx="1.4"/><path d="M7 15v5h10v-5"/><circle class="fill" cx="16.5" cy="11.4" r="0.7"/>',
+  study: '<path d="M12 6.2c-1.8-1.4-4-2-6.5-2v13.6c2.5 0 4.7.6 6.5 2 1.8-1.4 4-2 6.5-2V4.2c-2.5 0-4.7.6-6.5 2z"/><path d="M12 6.2v13.6"/>',
+};
+
+function iconHtml(name) {
+  const body = ICONS[name];
+  if (!body) return "";
+  return `<span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false">${body}</svg></span>`;
+}
+
 const VISITOR_SWAPS = [
   ["The team also calls this building Jackie B.", "Also known as Jackie B."],
   [
@@ -98,6 +113,7 @@ const state = {
   markers: new Map(),
   map: null,
   locationLayers: null,
+  lastPosition: null,
 };
 
 function escapeHtml(value) {
@@ -192,7 +208,7 @@ function popupHtml(building) {
     ? `<br>Also labeled ${escapeHtml(building.official_abbrev)}`
     : "";
   let html = `<div class="popup"><h2>${escapeHtml(building.building_name)}</h2>`;
-  html += `<p class="meta">${escapeHtml(building.sheet_abbrev)}${address}${also}<br>Study friendly: ${escapeHtml(STUDY[building.study_friendly] || "Not listed")}</p>`;
+  html += `<p class="meta">${escapeHtml(building.sheet_abbrev)}${address}${also}<br>${iconHtml("study")} Study friendly: ${escapeHtml(STUDY[building.study_friendly] || "Not listed")}</p>`;
 
   if (!building.amenities.length) {
     html += "<p>No microwaves, snack machines, drink machines, printers, or lost and found are listed here.</p>";
@@ -202,7 +218,7 @@ function popupHtml(building) {
     const items = building.amenities.filter((item) => item.category === category.id);
     if (!items.length) continue;
     const counted = building.counts[category.id];
-    html += `<h3>${escapeHtml(category.label)}${counted ? ` · ${counted}` : ""}</h3>`;
+    html += `<h3>${iconHtml(category.id)}<span>${escapeHtml(category.label)}${counted ? ` · ${counted}` : ""}</span></h3>`;
     for (const item of items) {
       const countText = item.count == null ? "No count" : String(item.count);
       let placeText = visitorCopy(item.location_detail);
@@ -239,7 +255,7 @@ function countLine(building) {
   const parts = [];
   for (const category of state.data.categories) {
     const count = building.counts[category.id];
-    if (count > 0) parts.push(`${count} ${noun(category.id, count)}`);
+    if (count > 0) parts.push({ id: category.id, text: `${count} ${noun(category.id, count)}` });
   }
   const flags = [];
   for (const item of building.amenities) {
@@ -260,7 +276,7 @@ function renderTotals() {
     const buildings = total.buildings_with_counted.length === 1
       ? "1 building"
       : `${total.buildings_with_counted.length} buildings`;
-    label.innerHTML = `${escapeHtml(category.label)}<small>${escapeHtml(buildings)}</small>`;
+    label.innerHTML = `${iconHtml(category.id)}<span>${escapeHtml(category.label)}<small>${escapeHtml(buildings)}</small></span>`;
     const value = document.createElement("b");
     value.textContent = String(total.counted);
     row.append(label, value);
@@ -309,16 +325,18 @@ function renderList() {
     button.setAttribute("role", "listitem");
     button.setAttribute("aria-current", building.building_id === state.selectedId ? "true" : "false");
     const { parts, flags } = countLine(building);
-    const line = parts.length ? parts.join(" · ") : "Nothing listed yet";
+    const line = parts.length
+      ? parts.map((part) => `<span class="count-bit">${iconHtml(part.id)}<span>${escapeHtml(part.text)}</span></span>`).join("")
+      : "Nothing listed yet";
     const tags = [
-      `Study friendly: ${STUDY[building.study_friendly]}`,
-      ...flags,
-      building.mapped ? "" : "Not on the map",
+      `<span class="tag muted">${iconHtml("study")}<span>Study friendly: ${escapeHtml(STUDY[building.study_friendly])}</span></span>`,
+      ...flags.map((tag) => {
+        const kind = tag.includes("not ") ? "warn" : "muted";
+        return `<span class="tag ${kind}">${escapeHtml(tag)}</span>`;
+      }),
+      building.mapped ? "" : `<span class="tag warn">Not on the map</span>`,
     ].filter(Boolean);
-    button.innerHTML = `<strong>${escapeHtml(building.building_name)}</strong><span class="sub">${escapeHtml(building.sheet_abbrev)} · ${escapeHtml(line)}</span><span class="tags">${tags.map((tag) => {
-      const kind = tag.startsWith("Not") || tag.includes("not ") ? "warn" : "muted";
-      return `<span class="tag ${kind}">${escapeHtml(tag)}</span>`;
-    }).join("")}</span>`;
+    button.innerHTML = `<strong>${escapeHtml(building.building_name)}</strong><span class="sub">${escapeHtml(building.sheet_abbrev)} · ${line}</span><span class="tags">${tags.join("")}</span>`;
     button.addEventListener("click", () => select(building.building_id, true));
     root.append(button);
   }
@@ -407,7 +425,7 @@ function renderNearby(ranked) {
     const button = document.createElement("button");
     button.type = "button";
     button.className = "building";
-    button.innerHTML = `<strong>${escapeHtml(item.building.building_name)}</strong><span class="sub">${escapeHtml(formatDistance(item.meters))} away</span>`;
+    button.innerHTML = `<strong>${escapeHtml(item.building.building_name)}</strong><span class="sub"><span class="count-bit">${categoryIcons(item.building)}</span><span>${escapeHtml(formatDistance(item.meters))} away</span></span>`;
     button.addEventListener("click", () => revealAndSelect(item.building.building_id));
     list.append(button);
   }
@@ -452,23 +470,72 @@ function showLocation(position) {
   state.map.fitBounds(bounds, { padding: [28, 28], maxZoom: 16 });
 }
 
-function locateUser() {
+function categoryIcons(building) {
+  const icons = [];
+  for (const category of state.data.categories) {
+    if (building.amenities.some((item) => item.category === category.id)) icons.push(iconHtml(category.id));
+  }
+  if (building.study_friendly === "yes") icons.push(iconHtml("study"));
+  return icons.join("");
+}
+
+function focusOnUser(latitude, longitude) {
+  const bounds = L.circle([latitude, longitude], { radius: MILE_METERS }).getBounds();
+  const ranked = distancesFrom(latitude, longitude);
+  if (!ranked.some((item) => item.meters <= MILE_METERS) && ranked[0]) {
+    bounds.extend([ranked[0].building.latitude, ranked[0].building.longitude]);
+  }
+  state.map.fitBounds(bounds, { padding: [28, 28], maxZoom: 16 });
+}
+
+function noteLocation(message) {
   const status = document.getElementById("location-status");
+  status.textContent = message;
+  status.classList.add("quiet-note");
+}
+
+function locateUser(options = {}) {
+  const quiet = options.quiet === true;
+  const status = document.getElementById("location-status");
+  if (state.lastPosition && options.recenter) {
+    focusOnUser(state.lastPosition.latitude, state.lastPosition.longitude);
+  }
   if (!navigator.geolocation) {
-    status.textContent = "Location is not available in this browser. Search still works.";
+    noteLocation("Location is unavailable.");
     return;
   }
-  status.textContent = "Finding your location…";
-  navigator.geolocation.getCurrentPosition(showLocation, (error) => {
-    document.getElementById("nearby-list").hidden = true;
-    if (error.code === 1) {
-      status.textContent = "Location permission was denied. You can still search by building name.";
-    } else if (error.code === 3) {
-      status.textContent = "Location took too long. Try again, or search by building name.";
-    } else {
-      status.textContent = "Location is unavailable right now. You can still search by building name.";
-    }
+  if (!quiet) {
+    status.classList.remove("quiet-note");
+    status.textContent = state.lastPosition ? "" : "Finding your location…";
+  }
+  navigator.geolocation.getCurrentPosition((position) => {
+    state.lastPosition = {
+      latitude: position.coords.latitude,
+      longitude: position.coords.longitude,
+    };
+    status.classList.remove("quiet-note");
+    showLocation(position);
+  }, (error) => {
+    if (!state.lastPosition) document.getElementById("nearby-list").hidden = true;
+    if (error.code === 1) noteLocation("Location is off.");
+    else if (error.code === 3) noteLocation("Couldn't find your location.");
+    else noteLocation("Location is unavailable.");
   }, { enableHighAccuracy: true, timeout: 12000, maximumAge: 0 });
+}
+
+async function requestLocationOnLoad() {
+  try {
+    if (navigator.permissions && navigator.permissions.query) {
+      const permission = await navigator.permissions.query({ name: "geolocation" });
+      if (permission.state === "denied") {
+        noteLocation("Location is off.");
+        return;
+      }
+    }
+  } catch (error) {
+    // Some browsers reject this query. Ask for a location anyway.
+  }
+  locateUser({ quiet: true });
 }
 
 function siteConfig() {
@@ -586,7 +653,7 @@ function renderToggles() {
     const button = document.createElement("button");
     button.type = "button";
     button.className = "toggle";
-    button.textContent = category.label;
+    button.innerHTML = `${iconHtml(category.id)}<span>${escapeHtml(category.label)}</span>`;
     button.setAttribute("aria-pressed", "true");
     button.addEventListener("click", () => {
       if (state.active.has(category.id)) state.active.delete(category.id);
@@ -613,7 +680,12 @@ function wireControls() {
     renderList();
     syncMarkers();
   });
-  document.getElementById("locate").addEventListener("click", locateUser);
+  document.getElementById("locate").addEventListener("click", () => locateUser({ recenter: true }));
+  const studyLabel = document.querySelector('label[for="study-only"]');
+  const studyInput = studyLabel && studyLabel.querySelector("input");
+  if (studyInput && !studyLabel.querySelector(".icon")) {
+    studyInput.insertAdjacentHTML("afterend", iconHtml("study"));
+  }
   wireSuggestions();
 }
 
@@ -643,6 +715,7 @@ function start(data) {
   state.map.fitBounds(bounds, { padding: [28, 28], maxZoom: 16 });
   window.addEventListener("resize", () => state.map.invalidateSize());
   state.map.invalidateSize();
+  requestLocationOnLoad();
 }
 
 fetch("data/campus.json")

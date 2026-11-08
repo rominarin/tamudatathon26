@@ -130,11 +130,52 @@ h1 {
 .toggles { display: flex; flex-wrap: wrap; gap: 0.35rem; }
 
 .toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
   border: 1px solid #d5c6ba;
   background: var(--card);
   border-radius: 999px;
   padding: 0.38rem 0.7rem;
   cursor: pointer;
+}
+
+.icon {
+  width: 1.05rem;
+  height: 1.05rem;
+  display: inline-flex;
+  flex: 0 0 auto;
+}
+
+.icon svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.icon svg .fill { fill: currentColor; stroke: none; }
+
+.popup h3, .count-bit, .tag, .total-row > span:first-child {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.28rem;
+}
+
+.popup h3 { display: flex; }
+
+.count-bit { margin-right: 0.45rem; }
+
+.quiet-note { font-size: 0.78rem; }
+
+.total-row > span:first-child > span {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.15;
 }
 
 .toggle[aria-pressed="true"] {
