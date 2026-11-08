@@ -1,10 +1,145 @@
-# tamudatathon26
+# Texas A&M campus amenities
 
-## Dashboard
+A static map of microwaves, snack vending machines, drink vending machines, lost and founds, and printers in Texas A&M buildings. The team wrote the notes by hand during TAMU Datathon 2026 (Build Your Own Dataset). This repository turns that sheet into a dataset and a map that can be hosted on GitHub Pages. There is no server.
+
+The map is a sample of buildings, not a directory of the whole campus.
+
+## Run it locally
+
+Python 3 is enough. No extra packages.
 
 ```bash
-pip install -r requirements.txt
-streamlit run dashboard.py
+python3 -m http.server 8000 -d site
 ```
 
-Until `data/metrics.csv` exists, the dashboard shows seeded placeholder data, labeled on the page. Point it at real output by adding that CSV (`timestamp`, `segment`, `metric`, `value`) or by setting `DATA_PATH` to another CSV. Aliases such as `date` and `category` are accepted.
+Open http://localhost:8000.
+
+Opening `site/index.html` as a file will not load the data. The page fetches `site/data/campus.json`.
+
+Rebuild the dataset after editing the sheet or the coordinate table:
+
+```bash
+python3 scripts/build_dataset.py
+python3 scripts/test_dataset.py
+```
+
+## What’s in the repo
+
+| Path | Role |
+| --- | --- |
+| `data/amenities_raw.csv` | The Google Sheet export, unchanged |
+| `data/building_coordinates.csv` | Latitude and longitude from the public campus GIS. Not collected by the team |
+| `data/amenities_clean.csv` | One row per amenity the parser kept |
+| `data/buildings.csv` | One row per building, including counts |
+| `site/` | The map. GitHub Pages publishes this folder |
+| `scripts/build_dataset.py` | Rebuilds the clean files and `site/data/campus.json` |
+| `DATA_DICTIONARY.md` | Every field |
+
+## Deploy to GitHub Pages
+
+The workflow is `.github/workflows/pages.yml`. It publishes the `site` directory when `main` changes, and it can also be started by hand from the Actions tab.
+
+After this pull request is merged, turn Pages on with these clicks:
+
+1. Open the repository on GitHub.
+2. Go to **Settings → Pages**.
+3. Under **Build and deployment**, set **Source** to **GitHub Actions**. Do not choose “Deploy from a branch” unless you drop the workflow. The workflow is what uploads `site/`.
+4. If Actions are disabled, go to **Settings → Actions → General** and allow actions for this repository.
+5. Merge the pull request into `main`. The workflow **Deploy to GitHub Pages** should run. If GitHub asks you to approve the `github-pages` environment, that approval is the remaining click.
+6. When the workflow is green, the site is at `https://rominarin.github.io/tamudatathon26/`.
+
+To publish again without another commit, open **Actions → Deploy to GitHub Pages → Run workflow**.
+
+### Custom domain
+
+No domain is configured. Do not add one until the domain name is decided. There is no `CNAME` file in this repo on purpose.
+
+When you have the domain:
+
+1. Add a file named `site/CNAME` whose only line is the domain, with no `https://` and no path. Example contents: `amenities.example.com`.
+2. On GitHub, open **Settings → Pages → Custom domain**, enter that same domain, and save. Turn on **Enforce HTTPS** after the certificate is ready.
+3. At the DNS host, follow [GitHub’s custom-domain instructions](https://docs.github.com/en/pages/configuring-a-custom-domain-for-your-github-pages-site). A subdomain is a `CNAME` record pointing at `rominarin.github.io`. An apex domain uses the `A` and `AAAA` records GitHub shows in that documentation. Use the addresses on that page, not a copy pasted from memory.
+
+The `CNAME` file has to live in `site/`, because that is the folder the action publishes.
+
+## Methodology
+
+### What the team collected
+
+The source is one row per building in a Google Sheet, exported to `data/amenities_raw.csv`. Cells are free text, not counts. Columns are Building, Abbrev, Microwave / Location, Microwave Restrictions, Printer Location, Lost and Found Location, Food Vending, Drink Vending, Chargers / Lab Equipment, Study Friendly Level, and Notes.
+
+**TODO (team):** the dates and times of collection. They are not in the sheet, so they are not filled in here.
+
+**TODO (team):** who recorded which buildings.
+
+**TODO (team):** the walk-through rules (whether every floor was checked, whether closed rooms were skipped, and whether a second person confirmed a count).
+
+### How the sheet was parsed
+
+`scripts/build_dataset.py` reads the raw CSV and writes the clean tables. Rules, applied in order:
+
+- Blank cells add nothing.
+- A food-vending cell that starts with “None” adds no snack machine. The sentence is kept as a note. The ILCB marketplace is in that category of note.
+- “Probably”, “not confirmed”, or “unconfirmed” is stored with `count_confidence = unconfirmed`, `confirmed = false`, and `include_in_total = false`. Mitchell Physics is the only row like this.
+- A stated number is an explicit count. “2 microwaves, 1st floor” is 2. “4 drink machines” is 4. Printer lines such as “2 Color MFP Printers in Room 219” are 2.
+- “Yes”, with or without a floor, is counted as 1 and marked `presence_only`. That may be low if several machines were present and nobody wrote a number.
+- A place with no number is counted as 1 per listed place (`inferred_from_locations`). Semicolons split places. “Floors 1, 2 and 3” is 3. Two named floors in one microwave cell, as in Zachry, are 2. The Academic Building cell “Various places” has no list and no number, so the count is blank and it is left out of the total.
+- Lost and found text split on “Also” is two places. ILCB has the staircase and the IMS office.
+- A printer cell can name a total (“3 printers:” plus the places). The places are not added on top of that total. The Medical Sciences Library also cites “TAMU OAL list: 1 Black/White Printer in Room 109”. That 1 is kept on the building and is not added to the campus total, because it may already be inside the stated 3.
+- Evans Library, the Evans Library Annex, and the Student Computing Center are separate sections of the Evans printer cell. Their stated numbers are added together and stay on the Evans pin, because the sheet put them in the Evans row.
+- Microwave restrictions are copied onto every microwave record for that building. Zachry’s note “ZLP students only, 1st Gen Students” is a restriction. “No tray, so the food does not spin” at the Medical Sciences Library is a description of the machine, not an access rule. Hotard’s “Available to students” is kept in the location text, not treated as a restriction.
+- The chargers / lab equipment column is not one of the five categories. The 12th Man Technology store is a retail store. Zachry’s tech vending machine is not a snack or drink machine. Bagel Block is a food counter. All three are kept under “written down, not counted”.
+
+Campus totals from this parse:
+
+| Category | Counted | Also in the sheet, not in the count |
+| --- | ---: | --- |
+| Microwaves | 18 | Academic Building, number not stated |
+| Snack vending | 5 | Mitchell Physics, “Probably yes, 3rd floor (not confirmed)” |
+| Drink vending | 12 | |
+| Lost and found | 4 | |
+| Printers | 44 | Medical Sciences Library, 1 OAL printer not added to the 3 already stated |
+
+### Where the coordinates came from
+
+Building coordinates are supplementary external data. The team did not collect them.
+
+On 2026-11-08 the public Texas A&M Facilities Coordination layer was queried:
+
+`https://gis.tamu.edu/arcgis/rest/services/FCOR/TAMU_BaseMap_060826/MapServer/2`
+
+Each sheet row was matched by building name to that layer’s `BldgName`, `BldgAbbrev`, address, and latitude/longitude. The match, including cases where the sheet abbreviation is not the official code, is stored in `data/building_coordinates.csv`. The Innovative Learning Classroom Building feature had a footprint but empty latitude and longitude attributes, so the pin is the centroid of that polygon.
+
+OpenStreetMap tiles are only the basemap. The pins are not OSM centroids.
+
+These name decisions are in the coordinate file, and on each pin:
+
+- Rudder is Rudder Tower (the Forum and Rudder Plaza), not Rudder Residence Hall.
+- The J. Mike Walker ’66 Department of Mechanical Engineering row is pinned to the James J. Cain ’51 Building, whose code is JCAIN.
+- Dwight Look Engineering Building is the official DLEB building. The sheet abbreviated that row DWEB.
+- Student Recreation Center is SREC, not the Southside Recreation Center.
+- EIC is the Engineering Innovation Center at 233 Ireland St. Blocker is 155 Ireland St, which matches the sheet’s “building next to Blocker”.
+- West Campus Library is the GIS building of that name, not the Wehner Building. BARC is not a separate building in the layer.
+
+**Civil Engineering Building was not placed.** No GIS building has that name. The abbreviation on that row is DLEB, which is the official code for Dwight Look Engineering Building, already mapped from a different row. CVE Lab Building (CVLB, 233 Spence St) was not used, because the sheet does not name it. The two microwaves from that row stay in the campus total and in the building list, and they are absent from the map.
+
+## Limitations
+
+- Coverage is whatever buildings are in the sheet. Most of campus is missing.
+- The notes are free text. “Yes” becomes 1, which can undercount. A floor with no number becomes 1, which can undercount or, if the writer was listing an area rather than a machine, overcount.
+- “Various places” in the Academic Building is a real mention with no usable count.
+- Unconfirmed wording is not treated as a machine that is definitely there.
+- Machines move, rooms close, and a restriction can change. Nothing here is a live inventory.
+- One sheet row can mix a building with nearby rooms (Evans Annex, Student Computing Center, BARC Room 124A). Those were not split into new buildings the sheet did not list.
+- Dwight Look and the unplaced Civil Engineering row may be two names for one building, or two different places. They were not merged, so the microwave total might double-count if they are the same two machines.
+- The Innovative Learning Classroom Building pin is a footprint centroid, not a doorway.
+- Other pins are the GIS point for the building, not the room where the microwave sits.
+- “Find nearest” is a straight line from the browser’s location to that building point. It is not a walking path, and it skips anything that could not be geolocated.
+- Study friendly is the sheet’s own label. “Not really” is not treated as study friendly. How the team decided that is a **TODO (team)**.
+- Collection dates, collectors, and the exact survey procedure are **TODO (team)** and are not invented here.
+
+## Map behavior
+
+Category buttons hide buildings that have none of the selected categories. Buildings with nothing recorded stay visible only while every category is on. Search matches the sheet name, the official name, abbreviations, and the address. “Study friendly only” keeps rows marked Yes.
+
+Campus totals do not change when you filter. The building list does. A pin click lists each category with the count, the place, any restriction, and whether the number was stated, inferred, or unconfirmed.
