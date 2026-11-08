@@ -89,6 +89,7 @@
         <textarea id="suggest-note" name="note" rows="3"></textarea>
       </label>
       <label for="suggest-email">Email <span class="optional">(optional)</span>
+        <span class="hint">Only used to let you know if your suggestion is approved.</span>
         <input id="suggest-email" name="email" type="email" autocomplete="email">
       </label>
       <p id="suggest-status" class="hint" role="status"></p>
@@ -97,6 +98,13 @@
         <button type="submit">Send</button>
       </div>
     </form>
+    <div id="suggest-thanks" class="suggest-form" hidden>
+      <h2>Thanks for the suggestion!</h2>
+      <p id="suggest-thanks-text"></p>
+      <div class="suggest-actions">
+        <button type="button" id="suggest-close">Close</button>
+      </div>
+    </div>
   </dialog>
   <iframe name="suggest-frame" title="Suggestion upload" hidden></iframe>
   <script src="config.js"></script>

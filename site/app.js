@@ -303,9 +303,15 @@ function renderDetail() {
   root.innerHTML = popupHtml(building);
 }
 
+function sortKey(name) {
+  return String(name || "").replace(/^\s*the\s+/i, "").trim();
+}
+
 function renderList() {
   const root = document.getElementById("building-list");
-  const buildings = visibleBuildings();
+  const buildings = visibleBuildings().slice().sort((left, right) => (
+    sortKey(left.building_name).localeCompare(sortKey(right.building_name), undefined, { sensitivity: "base" })
+  ));
   document.getElementById("showing").textContent = buildings.length
     ? `Showing ${buildings.length} of ${state.data.buildings.length} buildings.`
     : "No buildings match these filters.";
@@ -543,11 +549,28 @@ function siteConfig() {
 }
 
 function suggestionStatus(kind) {
-  if (kind === "sent" || kind === "google") return "Thanks. Your suggestion was sent.";
-  if (kind === "mailto") return "Your email app should open with this note.";
   if (kind === "google-unmapped") return "A Google Form address is set, but the question IDs are missing. The connection steps are in the project README.";
-  if (kind === "unconfigured") return "Suggestions are not connected yet. You can still use the map.";
   return "The suggestion could not be sent. Try again in a moment.";
+}
+
+function thanksMessage(email) {
+  if (email) {
+    return "We'll review it soon. If it's approved, we'll email you once it's on the map.";
+  }
+  return "We'll review it soon.";
+}
+
+function showSuggestionForm() {
+  document.getElementById("suggest-form").hidden = false;
+  document.getElementById("suggest-thanks").hidden = true;
+  document.getElementById("suggest-status").textContent = "";
+}
+
+function showThanks(email) {
+  document.getElementById("suggest-form").hidden = true;
+  const thanks = document.getElementById("suggest-thanks");
+  thanks.hidden = false;
+  document.getElementById("suggest-thanks-text").textContent = thanksMessage(email);
 }
 
 function postGoogleForm(endpoint, fields, payload) {
@@ -576,20 +599,8 @@ function postGoogleForm(endpoint, fields, payload) {
 
 async function sendSuggestion(payload) {
   const endpoint = String(siteConfig().suggestionEndpoint || "").trim();
-  const email = String(siteConfig().contactEmail || "").trim();
   const fields = siteConfig().suggestionFields;
-  if (!endpoint) {
-    if (!email) return "unconfigured";
-    const lines = [
-      `Building: ${payload.building}`,
-      `Category: ${payload.category}`,
-      `Location: ${payload.location}`,
-      payload.note ? `Note: ${payload.note}` : "",
-      payload.email ? `From: ${payload.email}` : "",
-    ].filter(Boolean);
-    window.location.href = `mailto:${email}?subject=${encodeURIComponent("Campus amenity update")}&body=${encodeURIComponent(lines.join("\n"))}`;
-    return "mailto";
-  }
+  if (!endpoint) return "local";
   if (/docs\.google\.com\/forms/i.test(endpoint)) {
     if (!fields || !fields.building || !fields.category || !fields.location) return "google-unmapped";
     postGoogleForm(endpoint, fields, payload);
@@ -616,11 +627,14 @@ function wireSuggestions() {
   const form = document.getElementById("suggest-form");
   const status = document.getElementById("suggest-status");
   document.getElementById("suggest-open").addEventListener("click", () => {
-    status.textContent = "";
+    showSuggestionForm();
     if (typeof dialog.showModal === "function") dialog.showModal();
     else dialog.setAttribute("open", "");
   });
   document.getElementById("suggest-cancel").addEventListener("click", () => {
+    dialog.close();
+  });
+  document.getElementById("suggest-close").addEventListener("click", () => {
     dialog.close();
   });
   form.addEventListener("submit", async (event) => {
@@ -635,8 +649,13 @@ function wireSuggestions() {
     const submit = form.querySelector('button[type="submit"]');
     submit.disabled = true;
     try {
-      status.textContent = suggestionStatus(await sendSuggestion(payload));
-      if (status.textContent.startsWith("Thanks")) form.reset();
+      const result = await sendSuggestion(payload);
+      if (result === "sent" || result === "google" || result === "local") {
+        form.reset();
+        showThanks(payload.email);
+        return;
+      }
+      status.textContent = suggestionStatus(result);
     } catch (error) {
       status.textContent = suggestionStatus("error");
     } finally {

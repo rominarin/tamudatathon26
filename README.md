@@ -77,7 +77,9 @@ Optional: a `CNAME` record named `www` whose value is `rominarin.github.io` (no 
 
 ## Suggest an update
 
-The map has a **Suggest an update** button. It does not store anything until you connect a form. The setting is `suggestionEndpoint` in `site/config.js`. Leave it as an empty string and the button explains that suggestions are not connected yet. If you set `contactEmail` instead, the button opens the visitor’s email app with the note filled in.
+The map has a **Suggest an update** button. With `suggestionEndpoint` left empty in `site/config.js`, Send shows a thank-you and does not store the suggestion anywhere. It does not open an email app, and it does not change the map.
+
+Submissions are reviewed manually before anything is added to the map. A suggestion does not change the map on its own. If you later paste an endpoint into `suggestionEndpoint`, Send posts the form and shows the thank-you only after that post succeeds. A failed post shows an error instead.
 
 To receive submissions with Formspree:
 
@@ -105,7 +107,7 @@ suggestionFields: {
 
 5. Commit `site/config.js` and wait for Pages to redeploy.
 
-No account is created by this repository. Until one of those addresses is filled in, sending a suggestion shows a short message and does not fail the page.
+No account is created by this repository. Until `suggestionEndpoint` is filled in, suggestions are not stored anywhere.
 
 ## Methodology
 
