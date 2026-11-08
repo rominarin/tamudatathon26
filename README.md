@@ -119,15 +119,11 @@ No account is created by this repository. Until `suggestionEndpoint` is filled i
 
 ## Methodology
 
-### What the team collected
+### What the team collected (https://docs.google.com/spreadsheets/d/12WLBW1zNqTBp67t4CrOgGyRAV87L5BIzy7u9PrSXHy4/edit?gid=0#gid=0)
 
 The source is one row per building in a Google Sheet, exported to `data/amenities_raw.csv`. Cells are free text, not counts. Columns are Building, Abbrev, Microwave / Location, Microwave Restrictions, Printer Location, Lost and Found Location, Food Vending, Drink Vending, Chargers / Lab Equipment, Study Friendly Level, and Notes.
 
-**TODO (team):** the dates and times of collection. They are not in the sheet, so they are not filled in here.
-
-**TODO (team):** who recorded which buildings.
-
-**TODO (team):** the walk-through rules (whether every floor was checked, whether closed rooms were skipped, and whether a second person confirmed a count).
+You can find the dates and times of collection, who recorded which buildings, and the walk-through rules (whether every floor was checked, whether closed rooms were skipped, and whether a second person confirmed a count) on the Google spreadsheets.
 
 ### How the sheet was parsed
 
