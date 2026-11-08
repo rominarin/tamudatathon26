@@ -6,8 +6,8 @@
   <title>Campus amenities · Texas A&amp;M</title>
   <meta name="description" content="Find microwaves, vending machines, lost and founds, and printers at Texas A&amp;M.">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' fill='%23500000'/%3E%3C/svg%3E">
-  <link rel="stylesheet" href="vendor/leaflet.css?v=20261108-4">
-  <link rel="stylesheet" href="styles.css?v=20261108-4">
+  <link rel="stylesheet" href="vendor/leaflet.css?v=20261108-6">
+  <link rel="stylesheet" href="styles.css?v=20261108-6">
 </head>
 <body>
   <a class="skip" href="#building-list">Skip to the building list</a>
@@ -59,29 +59,24 @@
   <dialog id="suggest-dialog" aria-labelledby="suggest-title">
     <form id="suggest-form" class="suggest-form" method="post" action="#">
       <h2 id="suggest-title">Suggest an update</h2>
-      <p class="hint">Share a microwave, machine, printer, lost and found, or another detail. Locations on the map are approximate.</p>
-      <label for="suggest-building">Building
-        <input id="suggest-building" name="building" required autocomplete="off">
-      </label>
-      <label for="suggest-category">Category
-        <select id="suggest-category" name="category" required>
-          <option value="microwave">Microwave</option>
-          <option value="snack vending">Snack vending</option>
-          <option value="drink vending">Drink vending</option>
-          <option value="lost and found">Lost and found</option>
-          <option value="printer">Printer</option>
-          <option value="other">Other</option>
+      <p class="hint">Tell us about a building. Suggestions are reviewed before anything is added to the map.</p>
+      <label for="suggest-building">Which building?
+        <select id="suggest-building" name="building" required>
+          <option value="">Choose a building</option>
         </select>
       </label>
-      <label for="suggest-location">Location detail
-        <input id="suggest-location" name="location" required placeholder="Floor, room, or where to look">
+      <label for="suggest-category">What does it have?
+        <select id="suggest-category" name="category" required>
+          <option value="">Choose one</option>
+        </select>
       </label>
-      <label for="suggest-note">Note <span class="optional">(optional)</span>
-        <textarea id="suggest-note" name="note" rows="3"></textarea>
+      <label for="suggest-location">Location
+        <input id="suggest-location" name="location" required placeholder="1st floor, or a specific room">
       </label>
-      <label for="suggest-email">Email <span class="optional">(optional)</span>
-        <span class="hint">Only used to let you know if your suggestion is approved.</span>
-        <input id="suggest-email" name="email" type="email" autocomplete="email">
+      <label for="suggest-study">Is this building study friendly?
+        <select id="suggest-study" name="study" required>
+          <option value="">Choose one</option>
+        </select>
       </label>
       <p id="suggest-status" class="hint" role="status"></p>
       <div class="suggest-actions">
@@ -98,8 +93,8 @@
     </div>
   </dialog>
   <iframe name="suggest-frame" title="Suggestion upload" hidden></iframe>
-  <script src="config.js?v=20261108-4"></script>
-  <script src="vendor/leaflet.js?v=20261108-4"></script>
-  <script src="app.js?v=20261108-4"></script>
+  <script src="config.js?v=20261108-6"></script>
+  <script src="vendor/leaflet.js?v=20261108-6"></script>
+  <script src="app.js?v=20261108-6"></script>
 </body>
 </html>

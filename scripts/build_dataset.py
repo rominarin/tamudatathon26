@@ -486,6 +486,8 @@ def parse_workbook(rows: list[dict[str, str]], coordinates: list[dict[str, str]]
     for row in rows:
         coord = by_name[row["Building"]]
         building_id = clean(row["Abbrev"]).lower()
+        if not building_id:
+            building_id = re.sub(r"[^a-z0-9]+", "-", clean(row["Building"]).lower()).strip("-") or "building"
         records = parse_row(row)
         for index, record in enumerate(records, start=1):
             record["amenity_id"] = f"{building_id}-{record['category']}-{index}"

@@ -109,6 +109,8 @@ suggestionFields: {
 
 No account is created by this repository. Until `suggestionEndpoint` is filled in, suggestions are not stored anywhere.
 
+The suggestion form posts to the public Google Form at `https://docs.google.com/forms/d/e/1FAIpQLSdLwUvB7KYSj21XwLXxOGckL_LDDbXLxBX5BvIGeamtkpvhDA/viewform`. The site asks the form’s questions: which building, what it has, the location, and whether it is study friendly. It does not ask for a separate note or email, because the form has no questions for those. A completed post shows the thank-you. Google Forms does not send a CORS response, so the page cannot read a confirmation body.
+
 ## Methodology
 
 ### What the team collected
@@ -142,10 +144,10 @@ Campus totals from this parse:
 | Category | Counted | Also in the sheet, not in the count |
 | --- | ---: | --- |
 | Microwaves | 19 | Academic Building, number not stated |
-| Snack vending | 5 | Mitchell Physics, “Probably yes, 3rd floor (not confirmed)” |
-| Drink vending | 12 | |
-| Lost and found | 4 | |
-| Printers | 44 | Medical Sciences Library, 1 OAL printer not added to the 3 already stated |
+| Snack vending | 6 | Mitchell Physics, “Probably yes, 3rd floor (not confirmed)” |
+| Drink vending | 13 | |
+| Lost and found | 5 | |
+| Printers | 45 | Medical Sciences Library, 1 OAL printer not added to the 3 already stated |
 
 ### Where the coordinates came from
 
@@ -167,6 +169,9 @@ These name decisions are in the coordinate file, and on each pin:
 - Student Recreation Center is SREC, not the Southside Recreation Center.
 - EIC is the Engineering Innovation Center at 233 Ireland St. Blocker is 155 Ireland St, which matches the sheet’s “building next to Blocker”.
 - West Campus Library is the GIS building of that name, not the Wehner Building. BARC is not a separate building in the layer.
+- Heldenfels Hall matches the GIS building HELD.
+- “E.L. Wehner Building and Cox Hall” uses the sheet abbreviation WCBA, so the pin is the Wehner Building. Cox Hall is not a separate building in the GIS layer.
+- The row named “Annex” is the Sterling C. Evans Library Annex, in front of Evans Library. The pin uses that GIS building. “Can check out technology” is a note only, not one of the five categories.
 
 ## Limitations
 

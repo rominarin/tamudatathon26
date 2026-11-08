@@ -19,18 +19,23 @@ def records(result, building_id, category):
 def main() -> None:
     result = dataset.build()
     totals = result["totals"]
-    assert len(result["buildings"]) == 21
-    assert sum(1 for building in result["buildings"] if building["mapped"]) == 21
+    assert len(result["buildings"]) == 24
+    assert sum(1 for building in result["buildings"] if building["mapped"]) == 24
     unmapped = [building["building_name"] for building in result["buildings"] if not building["mapped"]]
     assert unmapped == []
+    annex = next(item for item in result["buildings"] if item["building_id"] == "annex")
+    assert annex["official_name"] == "Evans Library Annex"
+    assert annex["counts"]["microwave"] == 0
+    assert annex["counts"]["printer"] == 0
+    assert any("check out technology" in mention.lower() for mention in annex["other_mentions"])
     assert "Civil Engineering Building" not in {building["building_name"] for building in result["buildings"]}
 
     assert totals["microwave"]["counted"] == 19
-    assert totals["snack_vending"]["counted"] == 5
+    assert totals["snack_vending"]["counted"] == 6
     assert totals["snack_vending"]["unconfirmed"] == 1
-    assert totals["drink_vending"]["counted"] == 12
-    assert totals["lost_and_found"]["counted"] == 4
-    assert totals["printer"]["counted"] == 44
+    assert totals["drink_vending"]["counted"] == 13
+    assert totals["lost_and_found"]["counted"] == 5
+    assert totals["printer"]["counted"] == 45
     assert totals["microwave"]["unspecified_buildings"] == ["Academic Building"]
 
     zach_microwaves = records(result, "zach", "microwave")
