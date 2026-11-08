@@ -22,7 +22,8 @@ zach-printer-6,zach,Zachry Engineering Education Complex,ZACH,printer,,1,explici
 zach-printer-7,zach,Zachry Engineering Education Complex,ZACH,printer,,1,explicit,true,true,Color MFP Printer in Room 382,,1 Color MFP Printer in Room 200; 2 Color MFP Printers in Room 219; 1 Color MFP Printer in Room 282; 1 Color MFP Printer in Room 318; 1 Color MFP Printer in Room 382; 1 Color MFP Printer in Room 416,
 zach-printer-8,zach,Zachry Engineering Education Complex,ZACH,printer,,1,explicit,true,true,Color MFP Printer in Room 416,,1 Color MFP Printer in Room 200; 2 Color MFP Printers in Room 219; 1 Color MFP Printer in Room 282; 1 Color MFP Printer in Room 318; 1 Color MFP Printer in Room 382; 1 Color MFP Printer in Room 416,
 peterson-microwave-1,peterson,Peterson Building,Peterson,microwave,,1,presence_only,true,true,"Yes, 2nd floor",,"Yes, 2nd floor","The cell says yes rather than a number, so this is counted as 1."
-jeb-printer-1,jeb,Jack E. Brown Chemical Engineering Building,JEB,printer,,1,explicit,true,true,Color MFP Printer in Room 118,,1 Color MFP Printer in Room 118,
+jeb-microwave-1,jeb,Jack E. Brown Chemical Engineering Building,JEB,microwave,,3,explicit,true,true,"3 microwaves, inside the glass door lounge",,"3 microwaves, inside the glass door lounge",
+jeb-printer-2,jeb,Jack E. Brown Chemical Engineering Building,JEB,printer,,1,explicit,true,true,Color MFP Printer in Room 118,,1 Color MFP Printer in Room 118,
 dweb-microwave-1,dweb,Dwight Look Engineering Building,DWEB,microwave,,2,explicit,true,true,"2 microwaves, 1st floor",,"2 microwaves, 1st floor",
 dweb-snack_vending-2,dweb,Dwight Look Engineering Building,DWEB,snack_vending,,1,explicit,true,true,1st floor,,1 on 1st floor,
 dweb-drink_vending-3,dweb,Dwight Look Engineering Building,DWEB,drink_vending,,1,explicit,true,true,1st floor,,1 on 1st floor,
@@ -46,7 +47,6 @@ etb-snack_vending-4,etb,Emerging Technologies Building,ETB,snack_vending,,1,expl
 etb-drink_vending-5,etb,Emerging Technologies Building,ETB,drink_vending,,2,explicit,true,true,1st floor,,2 on 1st floor,
 etb-printer-6,etb,Emerging Technologies Building,ETB,printer,,1,explicit,true,true,Color MFP Printer on the 1st Floor,,1 Color MFP Printer on the 1st Floor,
 mphy-snack_vending-1,mphy,Mitchell Physics Building,MPHY,snack_vending,,1,unconfirmed,false,false,"Probably yes, 3rd floor (not confirmed)",,"Probably yes, 3rd floor (not confirmed)","The cell says this is not confirmed, so it is not included in campus totals."
-dleb-microwave-1,dleb,Civil Engineering Building,DLEB,microwave,,2,explicit,true,true,"Floor 1, 2 microwaves",,"Floor 1, 2 microwaves",
 ilsb-microwave-1,ilsb,Interdisciplinary Life Sciences Building,ILSB,microwave,,3,inferred_from_locations,true,true,"Floors 1, 2 and 3",,"Floors 1, 2 and 3","No number of machines was stated, so this is one microwave per named floor."
 acad-microwave-1,acad,Academic Building,ACAD,microwave,,,unspecified,true,false,Various places,,Various places,"Microwaves are mentioned, but no number or list of places is given, so nothing was added to the campus total."
 wcl-printer-1,wcl,West Campus Library,WCL,printer,,1,explicit,true,true,Color MFP Printer in BARC Room 124A,,1 Color MFP Printer in BARC Room 124A; 1 Color MFP Printer on the 3rd Floor,

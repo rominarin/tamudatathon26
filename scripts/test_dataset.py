@@ -19,12 +19,13 @@ def records(result, building_id, category):
 def main() -> None:
     result = dataset.build()
     totals = result["totals"]
-    assert len(result["buildings"]) == 22
+    assert len(result["buildings"]) == 21
     assert sum(1 for building in result["buildings"] if building["mapped"]) == 21
     unmapped = [building["building_name"] for building in result["buildings"] if not building["mapped"]]
-    assert unmapped == ["Civil Engineering Building"]
+    assert unmapped == []
+    assert "Civil Engineering Building" not in {building["building_name"] for building in result["buildings"]}
 
-    assert totals["microwave"]["counted"] == 18
+    assert totals["microwave"]["counted"] == 19
     assert totals["snack_vending"]["counted"] == 5
     assert totals["snack_vending"]["unconfirmed"] == 1
     assert totals["drink_vending"]["counted"] == 12
@@ -85,6 +86,12 @@ def main() -> None:
     dwight = next(item for item in result["buildings"] if item["building_id"] == "dweb")
     assert dwight["official_abbrev"] == "DLEB"
     assert dwight["sheet_abbrev"] == "DWEB"
+    assert dwight["counts"]["microwave"] == 2
+    assert any("Civil Engineering" in mention for mention in dwight["other_mentions"])
+    jeb_microwaves = records(result, "jeb", "microwave")
+    assert [item["count"] for item in jeb_microwaves] == [3]
+    assert "glass door lounge" in jeb_microwaves[0]["location_detail"]
+    assert any("Jackie B." in mention for mention in next(item for item in result["buildings"] if item["building_id"] == "jeb")["other_mentions"])
 
     root = Path(__file__).resolve().parents[1]
     cname = (root / "site" / "CNAME").read_text(encoding="utf-8").strip()

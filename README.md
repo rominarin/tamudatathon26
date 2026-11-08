@@ -107,7 +107,7 @@ Campus totals from this parse:
 
 | Category | Counted | Also in the sheet, not in the count |
 | --- | ---: | --- |
-| Microwaves | 18 | Academic Building, number not stated |
+| Microwaves | 19 | Academic Building, number not stated |
 | Snack vending | 5 | Mitchell Physics, “Probably yes, 3rd floor (not confirmed)” |
 | Drink vending | 12 | |
 | Lost and found | 4 | |
@@ -129,12 +129,10 @@ These name decisions are in the coordinate file, and on each pin:
 
 - Rudder is Rudder Tower (the Forum and Rudder Plaza), not Rudder Residence Hall.
 - The J. Mike Walker ’66 Department of Mechanical Engineering row is pinned to the James J. Cain ’51 Building, whose code is JCAIN.
-- Dwight Look Engineering Building is the official DLEB building. The sheet abbreviated that row DWEB.
+- Dwight Look Engineering Building is the official DLEB building. The sheet abbreviated that row DWEB and also had a row labeled Civil Engineering Building (DLEB). Those rows were merged onto this pin. Both described 2 microwaves on the 1st floor, so the count stays 2.
 - Student Recreation Center is SREC, not the Southside Recreation Center.
 - EIC is the Engineering Innovation Center at 233 Ireland St. Blocker is 155 Ireland St, which matches the sheet’s “building next to Blocker”.
 - West Campus Library is the GIS building of that name, not the Wehner Building. BARC is not a separate building in the layer.
-
-**Civil Engineering Building was not placed.** No GIS building has that name. The abbreviation on that row is DLEB, which is the official code for Dwight Look Engineering Building, already mapped from a different row. CVE Lab Building (CVLB, 233 Spence St) was not used, because the sheet does not name it. The two microwaves from that row stay in the campus total and in the building list, and they are absent from the map.
 
 ## Limitations
 
@@ -144,7 +142,7 @@ These name decisions are in the coordinate file, and on each pin:
 - Unconfirmed wording is not treated as a machine that is definitely there.
 - Machines move, rooms close, and a restriction can change. Nothing here is a live inventory.
 - One sheet row can mix a building with nearby rooms (Evans Annex, Student Computing Center, BARC Room 124A). Those were not split into new buildings the sheet did not list.
-- Dwight Look and the unplaced Civil Engineering row may be two names for one building, or two different places. They were not merged, so the microwave total might double-count if they are the same two machines.
+- The sheet row labeled Civil Engineering Building was the Dwight Look Engineering Building. Its 2 first-floor microwaves matched the Dwight Look row, so they were not added a second time. Jack E. Brown (JEB, also called Jackie B.) has 3 microwaves inside the glass door lounge, added on the existing JEB pin.
 - The Innovative Learning Classroom Building pin is a footprint centroid, not a doorway.
 - Other pins are the GIS point for the building, not the room where the microwave sits.
 - “Find nearest” is a straight line from the browser’s location to that building point. It is not a walking path, and it skips anything that could not be geolocated.
