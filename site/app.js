@@ -30,10 +30,14 @@ const STUDY = {
   unknown: "Not listed",
 };
 
-const PIN = {
-  counted: { color: "#fffdfb", weight: 2, fillColor: "#500000", fillOpacity: 0.95, radius: 8 },
-  unconfirmed: { color: "#fffdfb", weight: 2, fillColor: "#8d5c10", fillOpacity: 0.95, radius: 8 },
-  empty: { color: "#fffdfb", weight: 2, fillColor: "#8d827b", fillOpacity: 0.92, radius: 7 },
+const COLORS = {
+  microwave: "#9A3412",
+  snack_vending: "#3F6212",
+  drink_vending: "#0C4A6E",
+  lost_and_found: "#5B21B6",
+  printer: "#115E59",
+  study: "#1E3A8A",
+  all: "#500000",
 };
 
 const ICONS = {
@@ -48,7 +52,31 @@ const ICONS = {
 function iconHtml(name) {
   const body = ICONS[name];
   if (!body) return "";
-  return `<span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false">${body}</svg></span>`;
+  const color = COLORS[name] ? ` style="color:${COLORS[name]}"` : "";
+  return `<span class="icon icon-${name}"${color} aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false">${body}</svg></span>`;
+}
+
+function categoriesOnBuilding(building) {
+  const ids = [];
+  for (const category of state.data.categories) {
+    if (building.amenities.some((item) => item.category === category.id)) ids.push(category.id);
+  }
+  if (building.study_friendly === "yes") ids.push("study");
+  return ids;
+}
+
+function pinIcon(building) {
+  const kinds = categoriesOnBuilding(building);
+  if (!kinds.length) kinds.push("empty");
+  const selected = building.building_id === state.selectedId;
+  const dots = kinds.map((kind) => `<span class="pin-dot pin-${kind}"></span>`).join("");
+  const width = kinds.length * 12 + 8;
+  return L.divIcon({
+    className: "pin-wrap",
+    html: `<div class="pin-mark${selected ? " is-selected" : ""}">${dots}</div>`,
+    iconSize: [width, 22],
+    iconAnchor: [width / 2, 11],
+  });
 }
 
 const VISITOR_SWAPS = [
@@ -144,14 +172,6 @@ function visitorCopy(text) {
 
 function byId(id) {
   return state.data.buildings.find((building) => building.building_id === id);
-}
-
-function pinKind(building) {
-  const counted = state.data.categories.some((category) => building.counts[category.id] > 0);
-  const unspecified = building.amenities.some((item) => item.count_confidence === "unspecified");
-  if (counted || unspecified) return "counted";
-  if (building.amenities.some((item) => !item.confirmed)) return "unconfirmed";
-  return "empty";
 }
 
 function matches(building) {
@@ -341,12 +361,6 @@ function renderList() {
   }
 }
 
-function styleFor(building) {
-  const kind = pinKind(building);
-  const selected = building.building_id === state.selectedId;
-  return { ...PIN[kind], radius: selected ? 11 : PIN[kind].radius, weight: selected ? 3 : 2 };
-}
-
 function syncMarkers() {
   const visible = new Set(visibleBuildings().filter((building) => building.mapped).map((building) => building.building_id));
   for (const [id, marker] of state.markers) {
@@ -357,20 +371,38 @@ function syncMarkers() {
   }
   for (const building of state.data.buildings) {
     if (!visible.has(building.building_id) || state.markers.has(building.building_id)) continue;
-    const marker = L.circleMarker([building.latitude, building.longitude], styleFor(building));
+    const marker = L.marker([building.latitude, building.longitude], { icon: pinIcon(building) });
     marker.bindPopup(popupHtml(building), { maxWidth: 320 });
     marker.on("click", () => select(building.building_id, false));
     marker.addTo(state.map);
     state.markers.set(building.building_id, marker);
   }
-  for (const [id, marker] of state.markers) marker.setStyle(styleFor(byId(id)));
+  for (const [id, marker] of state.markers) marker.setIcon(pinIcon(byId(id)));
+}
+
+function allCategoriesOn() {
+  return state.data.categories.every((category) => state.active.has(category.id));
 }
 
 function syncToggleButtons() {
+  const allOn = allCategoriesOn();
   document.querySelectorAll(".toggle").forEach((button) => {
-    const match = state.data.categories.find((item) => item.label === button.textContent);
-    if (match) button.setAttribute("aria-pressed", state.active.has(match.id) ? "true" : "false");
+    const id = button.dataset.category;
+    const on = id === "all" ? allOn : state.active.has(id);
+    button.setAttribute("aria-pressed", on ? "true" : "false");
   });
+}
+
+function setAllCategories(on) {
+  if (on) {
+    for (const category of state.data.categories) state.active.add(category.id);
+  } else {
+    state.active.clear();
+  }
+  if (state.selectedId && !matches(byId(state.selectedId))) state.selectedId = null;
+  syncToggleButtons();
+  renderList();
+  syncMarkers();
 }
 
 function select(id, openPopup) {
@@ -470,12 +502,7 @@ function showLocation(position) {
 }
 
 function categoryIcons(building) {
-  const icons = [];
-  for (const category of state.data.categories) {
-    if (building.amenities.some((item) => item.category === category.id)) icons.push(iconHtml(category.id));
-  }
-  if (building.study_friendly === "yes") icons.push(iconHtml("study"));
-  return icons.join("");
+  return categoriesOnBuilding(building).map((id) => iconHtml(id)).join("");
 }
 
 function focusOnUser(latitude, longitude) {
@@ -660,18 +687,29 @@ function wireSuggestions() {
 function renderToggles() {
   const root = document.getElementById("toggles");
   root.replaceChildren();
+  const allButton = document.createElement("button");
+  allButton.type = "button";
+  allButton.className = "toggle";
+  allButton.dataset.category = "all";
+  allButton.style.setProperty("--cat", COLORS.all);
+  allButton.innerHTML = "<span>All</span>";
+  allButton.setAttribute("aria-pressed", "true");
+  allButton.addEventListener("click", () => setAllCategories(!allCategoriesOn()));
+  root.append(allButton);
   for (const category of state.data.categories) {
     state.active.add(category.id);
     const button = document.createElement("button");
     button.type = "button";
     button.className = "toggle";
+    button.dataset.category = category.id;
+    button.style.setProperty("--cat", COLORS[category.id]);
     button.innerHTML = `${iconHtml(category.id)}<span>${escapeHtml(category.label)}</span>`;
     button.setAttribute("aria-pressed", "true");
     button.addEventListener("click", () => {
       if (state.active.has(category.id)) state.active.delete(category.id);
       else state.active.add(category.id);
-      button.setAttribute("aria-pressed", state.active.has(category.id) ? "true" : "false");
       if (state.selectedId && !matches(byId(state.selectedId))) state.selectedId = null;
+      syncToggleButtons();
       renderList();
       syncMarkers();
     });

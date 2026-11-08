@@ -179,10 +179,62 @@ h1 {
 }
 
 .toggle[aria-pressed="true"] {
-  background: var(--maroon);
-  border-color: var(--maroon);
-  color: #fffaf6;
+  background: var(--cat, var(--maroon));
+  border-color: var(--cat, var(--maroon));
+  color: #fff;
 }
+
+.toggle[aria-pressed="false"] {
+  background: #fff;
+  border-color: #c4bbb4;
+  color: #3f3835;
+}
+
+.toggle[aria-pressed="true"] .icon { color: #fff !important; }
+
+.toggle[aria-pressed="false"] .icon { color: #6b635e !important; }
+
+.filter-hint {
+  margin-left: 0.35rem;
+  color: var(--muted);
+  font-size: 0.72rem;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.leaflet-div-icon.pin-wrap {
+  background: transparent;
+  border: 0;
+}
+
+.pin-mark {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  height: 18px;
+  padding: 2px 4px;
+  background: #fffdfb;
+  border: 2px solid #500000;
+  border-radius: 999px;
+  box-shadow: 0 1px 3px rgba(36, 24, 22, 0.28);
+}
+
+.pin-mark.is-selected { border-color: #1f4e79; }
+
+.pin-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #8d827b;
+}
+
+.pin-microwave { background: #9a3412; }
+.pin-snack_vending { background: #3f6212; }
+.pin-drink_vending { background: #0c4a6e; }
+.pin-lost_and_found { background: #5b21b6; }
+.pin-printer { background: #115e59; }
+.pin-study { background: #1e3a8a; }
+.pin-empty { background: #8d827b; }
 
 .check {
   display: flex;
@@ -245,21 +297,6 @@ button.secondary, .product-actions button.secondary {
 
 .total-row small { display: block; color: var(--muted); font-size: 0.75rem; }
 
-.legend { display: flex; flex-wrap: wrap; gap: 0.7rem; margin: 0.35rem 0 0.2rem; }
-
-.swatch {
-  display: inline-block;
-  width: 0.7rem;
-  height: 0.7rem;
-  border-radius: 50%;
-  margin-right: 0.25rem;
-  vertical-align: -1px;
-  border: 1px solid #fff;
-}
-
-.swatch-counted { background: var(--maroon); }
-.swatch-unconfirmed { background: var(--amber); }
-.swatch-empty { background: #8d827b; }
 
 #detail {
   background: var(--card);
