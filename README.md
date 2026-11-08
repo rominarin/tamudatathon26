@@ -6,7 +6,7 @@ The map is a sample of buildings, not a directory of the whole campus.
 
 ## Why we built this
 
-Finding a microwave, printer, vending machine, or lost and found on the Texas A&M campus usually means wandering between buildings or asking around. No single consolidated public list exists, and searching through random online forums is completely unreliable and very tedious. 
+Finding a microwave, printer, vending machine, or lost and found on the Texas A&M campus usually means wandering between buildings or asking around. No single consolidated public list exists, and searching through random online forums is completely unreliable and very tedious. A
 
 We built this map as part of [TAMU Datathon 2026] to put that information in one place. Student volunteers visited buildings, recorded what they found, and turned the notes into a searchable map. The site is meant for [students between classes, commuters, and anyone new to campus].
 
