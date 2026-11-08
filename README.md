@@ -31,7 +31,7 @@ python3 scripts/test_dataset.py
 | `data/building_coordinates.csv` | Latitude and longitude from the public campus GIS. Not collected by the team |
 | `data/amenities_clean.csv` | One row per amenity the parser kept |
 | `data/buildings.csv` | One row per building, including counts |
-| `site/` | The map. GitHub Pages publishes this folder |
+| `site/` | The map. GitHub Pages publishes this folder, including `site/CNAME` |
 | `scripts/build_dataset.py` | Rebuilds the clean files and `site/data/campus.json` |
 | `DATA_DICTIONARY.md` | Every field |
 
@@ -46,21 +46,34 @@ After this pull request is merged, turn Pages on with these clicks:
 3. Under **Build and deployment**, set **Source** to **GitHub Actions**. Do not choose “Deploy from a branch” unless you drop the workflow. The workflow is what uploads `site/`.
 4. If Actions are disabled, go to **Settings → Actions → General** and allow actions for this repository.
 5. Merge the pull request into `main`. The workflow **Deploy to GitHub Pages** should run. If GitHub asks you to approve the `github-pages` environment, that approval is the remaining click.
-6. When the workflow is green, the site is at `https://rominarin.github.io/tamudatathon26/`.
+6. When the workflow is green, the default Pages URL is `https://rominarin.github.io/tamudatathon26/`. After DNS for the custom domain is in place, the same site is at `https://tamueats.us/`.
 
 To publish again without another commit, open **Actions → Deploy to GitHub Pages → Run workflow**.
 
 ### Custom domain
 
-No domain is configured. Do not add one until the domain name is decided. There is no `CNAME` file in this repo on purpose.
+The custom domain is `tamueats.us`. `site/CNAME` contains only that name. The Pages workflow uploads the whole `site` directory, so that file is `CNAME` at the root of the published site. Styles, scripts, Leaflet, and `data/campus.json` use relative URLs, so they load from `https://tamueats.us/` rather than from a `/tamudatathon26/` path.
 
-When you have the domain:
+Pages source is already **GitHub Actions**. After this change is on `main`:
 
-1. Add a file named `site/CNAME` whose only line is the domain, with no `https://` and no path. Example contents: `amenities.example.com`.
-2. On GitHub, open **Settings → Pages → Custom domain**, enter that same domain, and save. Turn on **Enforce HTTPS** after the certificate is ready.
-3. At the DNS host, follow [GitHub’s custom-domain instructions](https://docs.github.com/en/pages/configuring-a-custom-domain-for-your-github-pages-site). A subdomain is a `CNAME` record pointing at `rominarin.github.io`. An apex domain uses the `A` and `AAAA` records GitHub shows in that documentation. Use the addresses on that page, not a copy pasted from memory.
+1. Open **Settings → Pages**.
+2. Under **Custom domain**, enter `tamueats.us` and click **Save**.
+3. At the registrar, remove any old apex records that point somewhere else, then add these records. The name is the apex (`@` or a blank name, depending on the host).
 
-The `CNAME` file has to live in `site/`, because that is the folder the action publishes.
+| Type | Name | Value |
+| --- | --- | --- |
+| A | `@` | `185.199.108.153` |
+| A | `@` | `185.199.109.153` |
+| A | `@` | `185.199.110.153` |
+| A | `@` | `185.199.111.153` |
+| AAAA | `@` | `2606:50c0:8000::153` |
+| AAAA | `@` | `2606:50c0:8001::153` |
+| AAAA | `@` | `2606:50c0:8002::153` |
+| AAAA | `@` | `2606:50c0:8003::153` |
+
+Optional: a `CNAME` record named `www` whose value is `rominarin.github.io` (no repository name, and not `tamueats.us`). GitHub Pages will redirect `www.tamueats.us` to `https://tamueats.us/`.
+
+4. When the apex resolves to those addresses, return to **Settings → Pages** and turn on **Enforce HTTPS**. The checkbox can stay unavailable for up to 24 hours after DNS starts pointing at GitHub.
 
 ## Methodology
 

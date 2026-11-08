@@ -85,6 +85,16 @@ def main() -> None:
     dwight = next(item for item in result["buildings"] if item["building_id"] == "dweb")
     assert dwight["official_abbrev"] == "DLEB"
     assert dwight["sheet_abbrev"] == "DWEB"
+
+    root = Path(__file__).resolve().parents[1]
+    cname = (root / "site" / "CNAME").read_text(encoding="utf-8").strip()
+    assert cname == "tamueats.us"
+    for relative in ("site/index.html", "site/app.js", "site/styles.css"):
+        text = (root / relative).read_text(encoding="utf-8")
+        assert 'src="/' not in text
+        assert 'href="/' not in text
+        assert 'fetch("/' not in text
+        assert "fetch('/" not in text
     print("dataset checks passed")
 
 
