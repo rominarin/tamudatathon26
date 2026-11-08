@@ -145,6 +145,7 @@ h1 {
   height: 1.05rem;
   display: inline-flex;
   flex: 0 0 auto;
+  color: var(--maroon);
 }
 
 .icon svg {
@@ -179,9 +180,9 @@ h1 {
 }
 
 .toggle[aria-pressed="true"] {
-  background: var(--cat, var(--maroon));
-  border-color: var(--cat, var(--maroon));
-  color: #fff;
+  background: var(--maroon);
+  border-color: var(--maroon);
+  color: #fffaf6;
 }
 
 .toggle[aria-pressed="false"] {
@@ -190,9 +191,9 @@ h1 {
   color: #3f3835;
 }
 
-.toggle[aria-pressed="true"] .icon { color: #fff !important; }
+.toggle[aria-pressed="true"] .icon { color: #fff; }
 
-.toggle[aria-pressed="false"] .icon { color: #6b635e !important; }
+.toggle[aria-pressed="false"] .icon { color: #6b635e; }
 
 .filter-hint {
   margin-left: 0.35rem;
@@ -201,41 +202,6 @@ h1 {
   letter-spacing: 0;
   text-transform: none;
 }
-
-.leaflet-div-icon.pin-wrap {
-  background: transparent;
-  border: 0;
-}
-
-.pin-mark {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  background: transparent;
-  border: 0;
-  box-shadow: none;
-  padding: 0;
-}
-
-.pin-dot {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: #8d827b;
-  box-shadow: 0 0 0 1.5px #fff;
-}
-
-.pin-mark.is-selected .pin-dot {
-  box-shadow: 0 0 0 2px #1f4e79;
-}
-
-.pin-microwave { background: #9a3412; }
-.pin-snack_vending { background: #3f6212; }
-.pin-drink_vending { background: #0c4a6e; }
-.pin-lost_and_found { background: #5b21b6; }
-.pin-printer { background: #115e59; }
-.pin-study { background: #1e3a8a; }
-.pin-empty { background: #8d827b; }
 
 .check {
   display: flex;

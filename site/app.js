@@ -30,15 +30,9 @@ const STUDY = {
   unknown: "Not listed",
 };
 
-const COLORS = {
-  microwave: "#9A3412",
-  snack_vending: "#3F6212",
-  drink_vending: "#0C4A6E",
-  lost_and_found: "#5B21B6",
-  printer: "#115E59",
-  study: "#1E3A8A",
-  all: "#500000",
-};
+const PIN_MIN = 6;
+const PIN_MAX = 16;
+const PIN_REF = 16;
 
 const ICONS = {
   microwave: '<rect x="3" y="5" width="13" height="14" rx="1.5"/><path d="M8 5v14"/><circle class="fill" cx="5.4" cy="9" r="0.7"/><path d="M18.2 9.2c1 .9 1 2 0 2.9M20.2 7.6c1.8 1.6 1.8 3.8 0 5.4"/>',
@@ -52,8 +46,33 @@ const ICONS = {
 function iconHtml(name) {
   const body = ICONS[name];
   if (!body) return "";
-  const color = COLORS[name] ? ` style="color:${COLORS[name]}"` : "";
-  return `<span class="icon icon-${name}"${color} aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false">${body}</svg></span>`;
+  return `<span class="icon icon-${name}" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false">${body}</svg></span>`;
+}
+
+function visibleAmenityCount(building) {
+  let total = 0;
+  for (const category of state.data.categories) {
+    if (state.active.has(category.id)) total += building.counts[category.id] || 0;
+  }
+  if (building.study_friendly === "yes") total += 1;
+  return total;
+}
+
+function pinRadius(count, selected) {
+  const scaled = PIN_MIN + (PIN_MAX - PIN_MIN) * Math.sqrt(count) / Math.sqrt(PIN_REF);
+  const radius = Math.max(PIN_MIN, Math.min(PIN_MAX, scaled));
+  return selected ? Math.min(PIN_MAX + 2, radius + 2) : radius;
+}
+
+function styleFor(building) {
+  const selected = building.building_id === state.selectedId;
+  return {
+    color: "#fffdfb",
+    weight: selected ? 3 : 2,
+    fillColor: "#500000",
+    fillOpacity: 0.95,
+    radius: pinRadius(visibleAmenityCount(building), selected),
+  };
 }
 
 function categoriesOnBuilding(building) {
@@ -63,20 +82,6 @@ function categoriesOnBuilding(building) {
   }
   if (building.study_friendly === "yes") ids.push("study");
   return ids;
-}
-
-function pinIcon(building) {
-  const kinds = categoriesOnBuilding(building);
-  if (!kinds.length) kinds.push("empty");
-  const selected = building.building_id === state.selectedId;
-  const dots = kinds.map((kind) => `<span class="pin-dot pin-${kind}"></span>`).join("");
-  const width = kinds.length * 17 - 5;
-  return L.divIcon({
-    className: "pin-wrap",
-    html: `<div class="pin-mark${selected ? " is-selected" : ""}">${dots}</div>`,
-    iconSize: [Math.max(width, 12), 14],
-    iconAnchor: [Math.max(width, 12) / 2, 7],
-  });
 }
 
 const VISITOR_SWAPS = [
@@ -373,13 +378,22 @@ function syncMarkers() {
   }
   for (const building of state.data.buildings) {
     if (!visible.has(building.building_id) || state.markers.has(building.building_id)) continue;
-    const marker = L.marker([building.latitude, building.longitude], { icon: pinIcon(building) });
+    const marker = L.circleMarker([building.latitude, building.longitude], styleFor(building));
     marker.bindPopup(popupHtml(building), { maxWidth: 320 });
     marker.on("click", () => select(building.building_id, false));
     marker.addTo(state.map);
     state.markers.set(building.building_id, marker);
   }
-  for (const [id, marker] of state.markers) marker.setIcon(pinIcon(byId(id)));
+  const ordered = [...state.markers.entries()].sort((left, right) => (
+    visibleAmenityCount(byId(right[0])) - visibleAmenityCount(byId(left[0]))
+  ));
+  let selectedMarker = null;
+  for (const [id, marker] of ordered) {
+    marker.setStyle(styleFor(byId(id)));
+    if (id === state.selectedId) selectedMarker = marker;
+    else marker.bringToFront();
+  }
+  if (selectedMarker) selectedMarker.bringToFront();
 }
 
 function allCategoriesOn() {
@@ -708,7 +722,6 @@ function renderToggles() {
   allButton.type = "button";
   allButton.className = "toggle";
   allButton.dataset.category = "all";
-  allButton.style.setProperty("--cat", COLORS.all);
   allButton.innerHTML = "<span>All</span>";
   allButton.setAttribute("aria-pressed", "true");
   allButton.addEventListener("click", () => setAllCategories(!allCategoriesOn()));
@@ -719,7 +732,6 @@ function renderToggles() {
     button.type = "button";
     button.className = "toggle";
     button.dataset.category = category.id;
-    button.style.setProperty("--cat", COLORS[category.id]);
     button.innerHTML = `${iconHtml(category.id)}<span>${escapeHtml(category.label)}</span>`;
     button.setAttribute("aria-pressed", "true");
     button.addEventListener("click", () => {
