@@ -586,7 +586,14 @@ function siteConfig() {
 
 function suggestionStatus(kind) {
   if (kind === "google-unmapped") return "A Google Form address is set, but the question IDs are missing. The connection steps are in the project README.";
+  if (kind === "timeout") return "The suggestion timed out. Check your connection and try again.";
   return "The suggestion could not be sent. Try again in a moment.";
+}
+
+function fetchWithTimeout(url, options, ms = 12000) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), ms);
+  return fetch(url, { ...options, signal: controller.signal }).finally(() => clearTimeout(timer));
 }
 
 function thanksMessage(email) {
@@ -599,7 +606,31 @@ function thanksMessage(email) {
 function showSuggestionForm() {
   document.getElementById("suggest-form").hidden = false;
   document.getElementById("suggest-thanks").hidden = true;
-  document.getElementById("suggest-status").textContent = "";
+  const status = document.getElementById("suggest-status");
+  status.textContent = "";
+  status.classList.remove("error");
+}
+
+const SUGGESTION_FIELDS = [
+  ["suggest-building", "Which building?"],
+  ["suggest-category", "What does it have?"],
+  ["suggest-location", "Location"],
+  ["suggest-study", "Is this building study friendly?"],
+];
+
+function missingSuggestionFields() {
+  const missing = [];
+  for (const [id, label] of SUGGESTION_FIELDS) {
+    const field = document.getElementById(id);
+    const value = field ? field.value.trim() : "";
+    if (!field || !value) {
+      missing.push(label);
+      if (field) field.setAttribute("aria-invalid", "true");
+    } else {
+      field.removeAttribute("aria-invalid");
+    }
+  }
+  return missing;
 }
 
 function showThanks(email) {
@@ -620,10 +651,10 @@ async function sendSuggestion(payload) {
     body.set(fields.category, payload.category);
     body.set(fields.location, payload.location);
     if (fields.study) body.set(fields.study, payload.study || "");
-    await fetch(endpoint, { method: "POST", mode: "no-cors", body });
+    await fetchWithTimeout(endpoint, { method: "POST", mode: "no-cors", body });
     return "google";
   }
-  const response = await fetch(endpoint, {
+  const response = await fetchWithTimeout(endpoint, {
     method: "POST",
     headers: { Accept: "application/json", "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -689,15 +720,26 @@ function wireSuggestions() {
   });
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
+    const missing = missingSuggestionFields();
+    if (missing.length) {
+      const first = SUGGESTION_FIELDS.map(([id]) => document.getElementById(id)).find((field) => field && field.getAttribute("aria-invalid") === "true");
+      if (first) first.focus();
+      status.textContent = `Still needed: ${missing.join(", ")}`;
+      status.classList.add("error");
+      return;
+    }
     const payload = {
       building: document.getElementById("suggest-building").value.trim(),
       category: document.getElementById("suggest-category").value,
       location: document.getElementById("suggest-location").value.trim(),
-      note: document.getElementById("suggest-note").value.trim(),
       study: document.getElementById("suggest-study").value.trim(),
     };
     const submit = form.querySelector('button[type="submit"]');
+    const idleLabel = submit.textContent;
     submit.disabled = true;
+    submit.textContent = "Sending…";
+    status.textContent = "";
+    status.classList.remove("error");
     try {
       const result = await sendSuggestion(payload);
       if (result === "sent" || result === "google" || result === "local") {
@@ -707,10 +749,14 @@ function wireSuggestions() {
         return;
       }
       status.textContent = suggestionStatus(result);
+      status.classList.add("error");
     } catch (error) {
-      status.textContent = suggestionStatus("error");
+      const timedOut = error && error.name === "AbortError";
+      status.textContent = suggestionStatus(timedOut ? "timeout" : "error");
+      status.classList.add("error");
     } finally {
       submit.disabled = false;
+      submit.textContent = idleLabel;
     }
   });
 }
