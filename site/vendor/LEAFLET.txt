@@ -1,0 +1,5 @@
+Leaflet 1.9.4
+https://leafletjs.com/
+https://github.com/Leaflet/Leaflet/blob/v1.9.4/LICENSE
+BSD 2-Clause License. Copyright Vladimir Agafonkin and contributors.
+The files in this folder are the Leaflet distribution, stored here so the map does not depend on a third-party script host.
