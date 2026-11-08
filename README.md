@@ -6,7 +6,7 @@ The map is a sample of buildings, not a directory of the whole campus.
 
 ## Why we built this
 
-Finding a microwave, printer, vending machine, or lost and found on the Texas A&M campus usually means wandering between buildings or asking around. No single consolidated public list exists, and searching through random online forums is completely unreliable and very tedious. 
+Texas A&M is a big campus, and aggies are busy students. Finding a microwave, printer, vending machine, or lost and found on the Texas A&M campus usually means wandering between buildings or asking around. No single consolidated public list exists, and searching through random online forums is completely unreliable and very tedious. 
 
 We built this map as part of [TAMU Datathon 2026] to put that information in one place. Student volunteers visited buildings, recorded what they found, and turned the notes into a searchable map. The site is meant for [students between classes, commuters, and anyone new to campus].
 
@@ -119,7 +119,9 @@ No account is created by this repository. Until `suggestionEndpoint` is filled i
 
 ## Methodology
 
-### What the team collected (https://docs.google.com/spreadsheets/d/12WLBW1zNqTBp67t4CrOgGyRAV87L5BIzy7u9PrSXHy4/edit?gid=0#gid=0)
+### What the team collected 
+
+https://docs.google.com/spreadsheets/d/12WLBW1zNqTBp67t4CrOgGyRAV87L5BIzy7u9PrSXHy4/edit?usp=sharing 
 
 The source is one row per building in a Google Sheet, exported to `data/amenities_raw.csv`. Cells are free text, not counts. Columns are Building, Abbrev, Microwave / Location, Microwave Restrictions, Printer Location, Lost and Found Location, Food Vending, Drink Vending, Chargers / Lab Equipment, Study Friendly Level, and Notes.
 
@@ -181,7 +183,7 @@ These name decisions are in the coordinate file, and on each pin:
 
 - Nothing here is a live inventory. Machines move, rooms close, and restrictions change.
 - Data was collected by student volunteers, so coverage leans toward the engineering and academic core. Dorms, apartments and non-public buildings were left out on purpose.
-- Collection dates, collectors, and the exact survey procedure are on our [data sheet](https://docs.google.com/spreadsheets/d/12WLBW1zNqTBp67t4CrOgGyRAV87L5BIzy7u9PrSXHy4/edit?gid=0#gid=0).
+- Collection dates, collectors, and the exact survey procedure are on our [data sheet] (Data Collected.xlsx)
 - **Last updated:** 11/8/2026
 
 ## Limitations
