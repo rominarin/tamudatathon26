@@ -1,4 +1,4 @@
-# Texas A&M campus amenities
+# Texas A&M campus amenities (https://rominarin.github.io/tamudatathon26/)
 
 A static map of microwaves, snack vending machines, drink vending machines, lost and founds, and printers in Texas A&M buildings. The team wrote the notes by hand during TAMU Datathon 2026 (Build Your Own Dataset). This repository turns that sheet into a dataset and a map that can be hosted on GitHub Pages. There is no server.
 
@@ -44,6 +44,8 @@ python3 scripts/test_dataset.py
 | `DATA_DICTIONARY.md` | Every field |
 
 ## Deploy to GitHub Pages
+
+https://rominarin.github.io/tamudatathon26/ 
 
 The workflow is `.github/workflows/pages.yml`. It publishes the `site` directory when `main` changes, and it can also be started by hand from the Actions tab.
 
