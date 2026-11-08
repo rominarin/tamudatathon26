@@ -170,38 +170,65 @@ These name decisions are in the coordinate file, and on each pin:
 
 ## Limitations
 
-  About this data:
-  This site is a student project. It is not run, endorsed or reviewed by Texas A&M University. Building names and codes come from public TAMU sources and may not match        official records.
-  Nothing here is a live inventory. Machines move, rooms close, and restrictions change.
-  Data was collected by student volunteers, so coverage leans toward the engineering and academic core. Dorms, apartments and non-public buildings were left out on purpose.
-  Collection dates, collectors, and the exact survey procedure are on our data sheet.
-  Last updated: 11/8/2026.
+ ## About this data
 
-  Coverage is whatever buildings are in the sheet. Most of campus is missing. A missing entry means “not recorded,” not “doesn’t exist,” and we have no estimate of how        complete the data is.
-  Not all buildings were fully open, and not all floors of every building were explored.
-  3 microwave entries started as Reddit reports, and academic building microwaves need to be verified.
+> [!NOTE]
+> This site is a student project. It is not run, endorsed or reviewed by Texas A&M University. Building names and codes come from public TAMU sources and may not match official records.
 
-  How the notes became numbers:
-  The notes are free text, so counts are approximate. “Yes” was counted as 1, which can undercount. A floor listed with no number was counted as 1, which can undercount, or   overcount if the writer was listing an area and not a machine.
-  Some sheet rows mixed a building with nearby rooms (Evans Annex, Student Computing Center, BARC Room 124A). We did not split these into new buildings the sheet did not      list.
-  Jack E. Brown (JEB, also called Jackie B.) has 3 microwaves inside the glass-door lounge. These were added to the existing JEB pin.
-  “Study friendly” ratings are subjective, but they are assessed by the availability of seating, whiteboards, study rooms, and charging port availability. 
-  
-  Map and “Find nearest”:
-  Pins are the GIS point for the building, not the room where the microwave sits. “Find nearest” is a straight line from your browser’s location to a building point. It is    not a walking route; it ignores floors and building hours, and it skips anything that could not be geolocated.
-  
-  What we did not record:
-  Building hours, Aggie ID or card access, after-hours locks, and event closures. Some microwaves are limited to certain groups, and our restriction notes may be incomplete.
-  Whether a machine was working, whether a microwave had a turntable, or how clean it was. We only noted what was there when we visited.
-  Vending machine contents, prices, and payment types.
-  Accessibility, such as elevator access, door width, or reach height. Please don’t use this site to judge accessibility.
-  For lost items, contact the official office (for example, MSC Programs, Suite 2240). Pins here may not show every drop-off point.
-  
-  Suggestions and privacy:
-  For all user suggestions:
-  Suggestions are reviewed promptly. The optional email is used only to tell you when your suggestion is approved, and is deleted and is not shared.
-  To report an error, contact ap65693@tamu.edu.
-  
-  Map behavior:
-  Category buttons hide buildings that have none of the selected categories. Buildings with nothing recorded stay visible only while every category is on. Search matches      the sheet name, the official name, abbreviations, and the address. “Study friendly only” keeps rows marked Yes.
-  Campus totals do not change when you filter. The building list does. A pin click lists each category with the count, the place, any restriction, and whether the number      was stated, inferred, or unconfirmed.
+- Nothing here is a live inventory. Machines move, rooms close, and restrictions change.
+- Data was collected by student volunteers, so coverage leans toward the engineering and academic core. Dorms, apartments and non-public buildings were left out on purpose.
+- Collection dates, collectors, and the exact survey procedure are on our [data sheet](https://docs.google.com/spreadsheets/d/12WLBW1zNqTBp67t4CrOgGyRAV87L5BIzy7u9PrSXHy4/edit?gid=0#gid=0).
+- **Last updated:** 11/8/2026
+
+## Limitations
+
+### Coverage
+
+- Coverage is whatever buildings are in the sheet. Most of campus is missing.
+- A missing entry means "not recorded," not "doesn't exist." We have no estimate of how complete the data is.
+- Not all buildings were fully open, and not all floors of every building were explored.
+- 3 microwave entries started as Reddit reports.
+- Academic building microwaves still need to be verified.
+
+### How the notes became numbers
+
+- The notes are free text, so counts are approximate.
+  - "Yes" was counted as 1, which can undercount.
+  - A floor listed with no number was counted as 1. This can undercount, or overcount if the writer was listing an area and not a machine.
+- Some sheet rows mixed a building with nearby rooms (Evans Annex, Student Computing Center, BARC Room 124A). We did not split these into new buildings the sheet did not list.
+- Jack E. Brown (JEB, also called Jackie B.) has 3 microwaves inside the glass-door lounge. These were added to the existing JEB pin.
+- "Study friendly" ratings are subjective, but they are based on the availability of seating, whiteboards, study rooms, and charging ports.
+
+### Map and "Find nearest"
+
+- Pins are the GIS point for the building, not the room where the microwave sits.
+- "Find nearest" is a straight line from your browser's location to a building point.
+  - It is not a walking route.
+  - It ignores floors and building hours.
+  - It skips anything that could not be geolocated.
+
+### What we did not record
+
+- Building hours, Aggie ID or card access, after-hours locks, and event closures. Some microwaves are limited to certain groups, and our restriction notes may be incomplete.
+- Whether a machine was working, whether a microwave had a turntable, or how clean it was. We only noted what was there when we visited.
+- Vending machine contents, prices, and payment types.
+- Accessibility, such as elevator access, door width, or reach height.
+
+> [!WARNING]
+> Please don't use this site to judge accessibility.
+
+- For lost items, contact the official office (for example, MSC Programs, Suite 2240). Pins here may not show every drop-off point.
+
+## Suggestions and privacy
+
+- Suggestions are reviewed promptly.
+- The optional email is used only to tell you when your suggestion is approved. It is deleted afterward and is not shared.
+- To report an error, contact ap65693@tamu.edu.
+
+## Map behavior
+
+- **Category buttons** hide buildings that have none of the selected categories. Buildings with nothing recorded stay visible only while every category is on.
+- **Search** matches the sheet name, the official name, abbreviations, and the address.
+- **"Study friendly only"** keeps rows marked Yes.
+- **Campus totals** do not change when you filter. The building list does.
+- **Clicking a pin** lists each category with the count, the place, any restriction, and whether the number was stated, inferred, or unconfirmed.
