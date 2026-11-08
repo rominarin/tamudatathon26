@@ -20,9 +20,14 @@ def main() -> None:
     result = dataset.build()
     totals = result["totals"]
     assert len(result["buildings"]) == 24
-    assert sum(1 for building in result["buildings"] if building["mapped"]) == 23
+    assert sum(1 for building in result["buildings"] if building["mapped"]) == 24
     unmapped = [building["building_name"] for building in result["buildings"] if not building["mapped"]]
-    assert unmapped == ["Annex"]
+    assert unmapped == []
+    annex = next(item for item in result["buildings"] if item["building_id"] == "annex")
+    assert annex["official_name"] == "Evans Library Annex"
+    assert annex["counts"]["microwave"] == 0
+    assert annex["counts"]["printer"] == 0
+    assert any("check out technology" in mention.lower() for mention in annex["other_mentions"])
     assert "Civil Engineering Building" not in {building["building_name"] for building in result["buildings"]}
 
     assert totals["microwave"]["counted"] == 19

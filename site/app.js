@@ -595,37 +595,18 @@ function showThanks(email) {
   document.getElementById("suggest-thanks-text").textContent = thanksMessage(email);
 }
 
-function postGoogleForm(endpoint, fields, payload) {
-  const form = document.createElement("form");
-  form.method = "POST";
-  form.action = endpoint;
-  form.target = "suggest-frame";
-  form.hidden = true;
-  const add = (name, value) => {
-    if (!name) return;
-    const input = document.createElement("input");
-    input.name = name;
-    input.value = value || "";
-    form.append(input);
-  };
-  add(fields.building, payload.building);
-  add(fields.category, payload.category);
-  add(fields.location, payload.location);
-  add(fields.note, payload.note);
-  add(fields.email, payload.email);
-  add("submit", "Submit");
-  document.body.append(form);
-  form.submit();
-  form.remove();
-}
-
 async function sendSuggestion(payload) {
   const endpoint = String(siteConfig().suggestionEndpoint || "").trim();
   const fields = siteConfig().suggestionFields;
   if (!endpoint) return "local";
   if (/docs\.google\.com\/forms/i.test(endpoint)) {
     if (!fields || !fields.building || !fields.category || !fields.location) return "google-unmapped";
-    postGoogleForm(endpoint, fields, payload);
+    const body = new URLSearchParams();
+    body.set(fields.building, payload.building);
+    body.set(fields.category, payload.category);
+    body.set(fields.location, payload.location);
+    if (fields.study) body.set(fields.study, payload.study || "");
+    await fetch(endpoint, { method: "POST", mode: "no-cors", body });
     return "google";
   }
   const response = await fetch(endpoint, {
@@ -644,7 +625,40 @@ async function sendSuggestion(payload) {
   return "sent";
 }
 
+function fillSelect(select, choices, placeholder) {
+  const current = select.value;
+  select.replaceChildren();
+  const blank = document.createElement("option");
+  blank.value = "";
+  blank.textContent = placeholder;
+  select.append(blank);
+  for (const choice of choices) {
+    const option = document.createElement("option");
+    option.value = choice;
+    option.textContent = choice;
+    select.append(option);
+  }
+  if (current) select.value = current;
+}
+
+function fillSuggestionChoices() {
+  const config = siteConfig();
+  const building = document.getElementById("suggest-building");
+  const category = document.getElementById("suggest-category");
+  const study = document.getElementById("suggest-study");
+  if (building && Array.isArray(config.buildingChoices) && config.buildingChoices.length) {
+    fillSelect(building, config.buildingChoices, "Choose a building");
+  }
+  if (category && Array.isArray(config.categoryChoices) && config.categoryChoices.length) {
+    fillSelect(category, config.categoryChoices, "Choose one");
+  }
+  if (study && Array.isArray(config.studyChoices) && config.studyChoices.length) {
+    fillSelect(study, config.studyChoices, "Choose one");
+  }
+}
+
 function wireSuggestions() {
+  fillSuggestionChoices();
   const dialog = document.getElementById("suggest-dialog");
   const form = document.getElementById("suggest-form");
   const status = document.getElementById("suggest-status");
@@ -666,7 +680,7 @@ function wireSuggestions() {
       category: document.getElementById("suggest-category").value,
       location: document.getElementById("suggest-location").value.trim(),
       note: document.getElementById("suggest-note").value.trim(),
-      email: document.getElementById("suggest-email").value.trim(),
+      study: document.getElementById("suggest-study").value.trim(),
     };
     const submit = form.querySelector('button[type="submit"]');
     submit.disabled = true;
@@ -674,7 +688,8 @@ function wireSuggestions() {
       const result = await sendSuggestion(payload);
       if (result === "sent" || result === "google" || result === "local") {
         form.reset();
-        showThanks(payload.email);
+        fillSuggestionChoices();
+        showThanks("");
         return;
       }
       status.textContent = suggestionStatus(result);
